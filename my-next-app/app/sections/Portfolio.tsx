@@ -53,7 +53,7 @@ export default function Portfolio() {
   }, []);
 
   return (
-    <section id="portfolio" ref={sectionRef} className="py-24 bg-[#050505] relative overflow-hidden">
+    <section id="about" ref={sectionRef} className="py-24 bg-[#050505] relative overflow-hidden">
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px]" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">

@@ -19,7 +19,7 @@ export default function CTA() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-[#050505] relative overflow-hidden">
+    <section id="pricing" className="py-24 bg-[#050505] relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
         <div
           className={`relative bg-gradient-to-b from-purple-600/10 to-transparent border border-[#222] rounded-3xl p-12 md:p-16 overflow-hidden transition-all duration-1000 ${
