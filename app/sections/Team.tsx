@@ -33,7 +33,7 @@ export default function Team() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-[#0a0a0f] relative overflow-hidden">
+    <section id="about" className="py-24 bg-[#050505] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <p className="text-sm text-purple-400 uppercase tracking-wider mb-4">Our Team</p>

@@ -63,7 +63,7 @@ export default function Hero() {
               }`}
             >
               <a
-                href="#services"
+                href="#get-started"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
               >
                 Get Started
