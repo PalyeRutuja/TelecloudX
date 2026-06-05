@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleCloudX — Deploy VMs in seconds. Powered by AI.</title>
+    <meta name="description" content="Deploy virtual machines in seconds, auto-scale with intelligence, and only pay for what you use. Built for developers who move fast.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060810;
+            --bg1: #0b0e1a;
+            --bg2: #101525;
+            --card: #12192b;
+            --border: #1a2540;
+            --accent: #2563eb;
+            --glow: #3b82f6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --purple: #8b5cf6;
+            --text: #f1f5f9;
+            --muted: #64748b;
+            --font-heading: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Dot Grid Background */
+        .dot-grid {
+            background-image: radial-gradient(circle, rgba(37, 99, 235, 0.15) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(6, 8, 16, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-family: var(--font-body);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-large {
+            padding: 0.875rem 1.75rem;
+            font-size: 1rem;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 8rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .announcement {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .announcement:hover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: rgba(37, 99, 235, 0.4);
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtext {
+            font-size: 1.125rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-stat-value {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .hero-stat-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Terminal */
+        .terminal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 32px;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dots {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ef4444; }
+        .terminal-dot.yellow { background: #eab308; }
+        .terminal-dot.green { background: #22c55e; }
+
+        .terminal-content {
+            margin-top: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .terminal-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .terminal-line:nth-child(1) { animation-delay: 0.5s; }
+        .terminal-line:nth-child(2) { animation-delay: 1.5s; }
+        .terminal-line:nth-child(3) { animation-delay: 2.5s; }
+        .terminal-line:nth-child(4) { animation-delay: 3.5s; }
+
+        .terminal-prompt {
+            color: var(--accent);
+        }
+
+        .terminal-command {
+            color: var(--text);
+        }
+
+        .terminal-success {
+            color: var(--green);
+        }
+
+        .terminal-info {
+            color: var(--muted);
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--accent);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Marquee */
+        .marquee {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .marquee-label {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .marquee-track {
+            display: flex;
+            animation: marquee 30s linear infinite;
+            width: max-content;
+        }
+
+        .marquee-item {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--muted);
+            padding: 0 3rem;
+            white-space: nowrap;
+            opacity: 0.6;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Features */
+        .features {
+            padding: 6rem 0;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 1.5rem;
+        }
+
+        .bento-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
+        }
+
+        .bento-card.wide {
+            grid-column: span 2;
+        }
+
+        .bento-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .bento-icon.blue {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+        }
+
+        .bento-icon.purple {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--purple);
+        }
+
+        .bento-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--green);
+        }
+
+        .bento-icon.amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber);
+        }
+
+        .bento-card h3 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bento-card p {
+            color: var(--muted);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* AI Section */
+        .ai-section {
+            padding: 6rem 0;
+            background: linear-gradient(180deg, var(--bg) 0%, var(--bg1) 100%);
+        }
+
+        .ai-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--purple);
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .ai-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: var(--text);
+        }
+
+        .ai-features li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .ai-chat {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            animation: slideUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .chat-message:nth-child(1) { animation-delay: 0.5s; }
+        .chat-message:nth-child(2) { animation-delay: 1.5s; }
+        .chat-message:nth-child(3) { animation-delay: 2.5s; }
+        .chat-message:nth-child(4) { animation-delay: 3.5s; }
+
+        .chat-user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .chat-user .chat-bubble {
+            background: var(--bg2);
+            color: var(--text);
+            border-radius: 16px 16px 4px 16px;
+            padding: 0.75rem 1rem;
+            max-width: 80%;
+            font-size: 0.875rem;
+        }
+
+        .chat-ai {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .chat-ai-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chat-ai .chat-bubble {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: var(--text);
+            border-radius: 16px 16px 16px 4px;
+            padding: 0.75rem 1rem;
+            max-width: 80%;
+            font-size: 0.875rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--muted);
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pricing */
+        .pricing {
+            padding: 6rem 0;
+        }
+
+        .pricing-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: var(--bg2);
+            border-radius: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(24px);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .pricing-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(37, 99, 235, 0.15);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pricing-name {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-desc {
+            color: var(--muted);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-price {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+        .pricing-period {
+            color: var(--muted);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 6rem 0;
+            background: var(--bg1);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .testimonial-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .stars {
+            color: var(--amber);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: white;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .author-role {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 0;
+        }
+
+        .cta-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-card h2 {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .cta-card p {
+            color: var(--muted);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .cta-card .btn {
+            position: relative;
+            font-size: 1.125rem;
+            padding: 1rem 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-brand p {
+            color: var(--muted);
+            font-size: 0.875rem;
+            max-width: 300px;
+        }
+
+        .footer-links h4 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-bottom p {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            z-index: 999;
+            padding: 2rem;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .mobile-menu.active {
+            display: flex;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-menu-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-menu-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-visual {
+                order: -1;
+            }
+
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bento-card.wide {
+                grid-column: span 2;
+            }
+
+            .ai-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-stats {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bento-card.wide {
+                grid-column: span 1;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .cta-card {
+                padding: 2rem;
+            }
+
+            .cta-card h2 {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Scroll Animations */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Counter Animation */
+        .counter {
+            font-family: var(--font-heading);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="dot-grid">
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                TeleCloudX
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="#features">Products</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#">Docs</a></li>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">Status</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="#" class="btn btn-ghost">Log In</a>
+                <a href="#" class="btn btn-primary">Get Started Free</a>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                TeleCloudX
+            </a>
+            <button class="mobile-menu-btn" id="mobileMenuClose" aria-label="Close menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <ul class="mobile-menu-links">
+            <li><a href="#features">Products</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#">Docs</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Status</a></li>
+        </ul>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a href="#" class="btn btn-ghost" style="justify-content: center;">Log In</a>
+            <a href="#" class="btn btn-primary" style="justify-content: center;">Get Started Free</a>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="announcement">
+                    <span>✦</span>
+                    <span>Now with AI Infrastructure Co-Pilot</span>
+                    <span>→</span>
+                </div>
+                <h1>
+                    Cloud Infrastructure,<br>
+                    <span class="gradient-text">Supercharged by AI</span>
+                </h1>
+                <p class="hero-subtext">
+                    Deploy virtual machines in seconds, auto-scale with intelligence, and only pay for what you use. Built for developers who move fast.
+                </p>
+                <div class="hero-actions">
+                    <a href="#" class="btn btn-primary btn-large">Deploy Your First VM — Free</a>
+                    <a href="#" class="btn btn-ghost btn-large">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        See How It Works
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">2s</span>
+                        <span class="hero-stat-label">Deploy Time</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">99.99%</span>
+                        <span class="hero-stat-label">Uptime SLA</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">40+</span>
+                        <span class="hero-stat-label">Regions</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">$0.004/hr</span>
+                        <span class="hero-stat-label">Starting Price</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="terminal">
+                    <div class="terminal-dots">
+                        <div class="terminal-dot red"></div>
+                        <div class="terminal-dot yellow"></div>
+                        <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-content">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-command">smartai deploy --vm ubuntu-22 --size 2cpu-4gb</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-success">✓</span>
+                            <span>VM provisioned in 1.8s</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-success">✓</span>
+                            <span class="terminal-info">IP: 45.131.22.114</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-success">✓</span>
+                            <span class="terminal-info">SSH ready</span>
+                            <span class="cursor"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Logo Marquee -->
+    <section class="marquee">
+        <p class="marquee-label">Trusted by engineers at —</p>
+        <div class="marquee-track">
+            <span class="marquee-item">Acme Corp</span>
+            <span class="marquee-item">DevStack</span>
+            <span class="marquee-item">NexaCloud</span>
+            <span class="marquee-item">Orbital Labs</span>
+            <span class="marquee-item">Veridian</span>
+            <span class="marquee-item">SynthWave</span>
+            <span class="marquee-item">Codepath</span>
+            <span class="marquee-item">Axion</span>
+            <span class="marquee-item">Acme Corp</span>
+            <span class="marquee-item">DevStack</span>
+            <span class="marquee-item">NexaCloud</span>
+            <span class="marquee-item">Orbital Labs</span>
+            <span class="marquee-item">Veridian</span>
+            <span class="marquee-item">SynthWave</span>
+            <span class="marquee-item">Codepath</span>
+            <span class="marquee-item">Axion</span>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <h2>Everything you need to ship faster</h2>
+                <p>From instant VM deployment to AI-powered optimization, TeleCloudX gives you the tools to build, scale, and manage infrastructure effortlessly.</p>
+            </div>
+            <div class="bento-grid">
+                <div class="bento-card wide fade-up">
+                    <div class="bento-icon blue">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h3>Instant VM Deploy</h3>
+                    <p>Launch Ubuntu, Debian, or Windows VMs in under 2 seconds. Choose from 20+ pre-configured sizes and customize on the fly.</p>
+                </div>
+                <div class="bento-card wide fade-up">
+                    <div class="bento-icon purple">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <h3>AI Co-Pilot</h3>
+                    <p>Natural language infrastructure control. Ask it to scale, optimize costs, or diagnose issues — it understands your intent and takes action.</p>
+                </div>
+                <div class="bento-card fade-up">
+                    <div class="bento-icon green">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h3>Block Storage</h3>
+                    <p>High-performance NVMe SSD volumes. Attach, detach, and snapshot in seconds with zero downtime.</p>
+                </div>
+                <div class="bento-card fade-up">
+                    <div class="bento-icon blue">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Private Networking</h3>
+                    <p>VPC, firewalls, and load balancers with one-click setup. Secure your infrastructure without the complexity.</p>
+                </div>
+                <div class="bento-card fade-up">
+                    <div class="bento-icon amber">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </div>
+                    <h3>Automated Backups</h3>
+                    <p>Daily snapshots with 30-day retention. One-click restore to any point in time. Never lose data again.</p>
+                </div>
+                <div class="bento-card fade-up">
+                    <div class="bento-icon blue">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </div>
+                    <h3>Global CDN</h3>
+                    <p>Serve assets from 40+ edge nodes worldwide. Reduce latency and improve user experience automatically.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Co-Pilot Spotlight -->
+    <section class="ai-section">
+        <div class="section-container">
+            <div class="ai-grid">
+                <div class="ai-content fade-up">
+                    <div class="ai-badge">
+                        <span>✦</span>
+                        <span>AI Co-Pilot</span>
+                    </div>
+                    <h2 style="font-family: var(--font-heading); font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+                        Your infrastructure,<br>managed by intelligence
+                    </h2>
+                    <p style="color: var(--muted); font-size: 1.125rem; margin-bottom: 2rem;">
+                        Stop babysitting servers. Let AI handle the routine — scaling, optimization, and incident response — while you focus on building.
+                    </p>
+                    <ul class="ai-features">
+                        <li>Predict and prevent downtime automatically</li>
+                        <li>Auto-scale based on live traffic patterns</li>
+                        <li>Control infra with plain English commands</li>
+                        <li>Get cost-saving recommendations daily</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary">Try AI Co-Pilot →</a>
+                </div>
+                <div class="ai-chat fade-up">
+                    <div class="chat-message chat-user">
+                        <div class="chat-bubble">Scale my API servers for tonight's launch</div>
+                    </div>
+                    <div class="chat-message chat-ai">
+                        <div class="chat-ai-avatar">AI</div>
+                        <div class="chat-bubble">
+                            Done. Scaled api-cluster-01 from 3 → 10 nodes. Cost impact: +$0.18/hr. Auto-scale trigger set at 80% CPU.
+                        </div>
+                    </div>
+                    <div class="chat-message chat-user">
+                        <div class="chat-bubble">What's my spend this month?</div>
+                    </div>
+                    <div class="chat-message chat-ai">
+                        <div class="chat-ai-avatar">AI</div>
+                        <div class="chat-bubble">
+                            You're at $142.80 — 9% under budget. Tip: downsize db-replica-02 to save ~$22/mo.
+                        </div>
+                    </div>
+                    <div class="chat-message chat-ai" style="opacity: 1;">
+                        <div class="chat-ai-avatar">AI</div>
+                        <div class="chat-bubble">
+                            <div class="typing-dots">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <h2>Simple, transparent pricing</h2>
+                <p>Start free, scale as you grow. No hidden fees, no surprises.</p>
+            </div>
+            <div class="pricing-toggle fade-up">
+                <span style="color: var(--text); font-weight: 500;">Monthly</span>
+                <div class="toggle-switch" id="pricingToggle">
+                    <div class="toggle-knob"></div>
+                </div>
+                <span style="color: var(--muted);">Annually <span style="color: var(--green); font-size: 0.75rem;">(20% off)</span></span>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card fade-up">
+                    <div class="pricing-name">Starter</div>
+                    <div class="pricing-desc">Free forever</div>
+                    <div class="pricing-price" data-monthly="$0" data-annual="$0">$0</div>
+                    <div class="pricing-period">per month</div>
+                    <ul class="pricing-features">
+                        <li>1 VM</li>
+                        <li>25GB SSD</li>
+                        <li>1TB bandwidth</li>
+                        <li>Community support</li>
+                        <li>Basic monitoring</li>
+                    </ul>
+                    <a href="#" class="btn btn-ghost">Start Free</a>
+                </div>
+                <div class="pricing-card featured fade-up">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="pricing-name">Pro</div>
+                    <div class="pricing-desc">For growing teams</div>
+                    <div class="pricing-price" data-monthly="$29" data-annual="$23">$29</div>
+                    <div class="pricing-period">per month</div>
+                    <ul class="pricing-features">
+                        <li>10 VMs</li>
+                        <li>500GB SSD</li>
+                        <li>10TB bandwidth</li>
+                        <li>AI Co-Pilot</li>
+                        <li>Priority support</li>
+                        <li>Advanced analytics</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary">Start Pro Trial</a>
+                </div>
+                <div class="pricing-card fade-up">
+                    <div class="pricing-name">Enterprise</div>
+                    <div class="pricing-desc">For large organizations</div>
+                    <div class="pricing-price">Custom</div>
+                    <div class="pricing-period">contact us</div>
+                    <ul class="pricing-features">
+                        <li>Unlimited VMs</li>
+                        <li>Dedicated hardware</li>
+                        <li>AI Enterprise</li>
+                        <li>SLA guarantee</li>
+                        <li>White-glove support</li>
+                        <li>Custom integrations</li>
+                    </ul>
+                    <a href="#" class="btn btn-ghost">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <h2>Loved by developers worldwide</h2>
+                <p>See what teams are saying about TeleCloudX.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card fade-up">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"We cut our infra costs by 40% in the first month using TeleCloudX's cost optimization. The AI Co-Pilot is like having an extra engineer on call."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">AT</div>
+                        <div class="author-info">
+                            <span class="author-name">Alex T.</span>
+                            <span class="author-role">CTO at DevStack</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-up">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Deploying VMs used to take minutes. Now it's literally 2 seconds. The auto-scaling saved us during our biggest product launch ever."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">PM</div>
+                        <div class="author-info">
+                            <span class="author-name">Priya M.</span>
+                            <span class="author-role">Lead DevOps at Orbital Labs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-up">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"The AI Co-Pilot caught a memory leak before our monitoring did. It suggested a fix, we applied it, and the issue was gone. Incredible."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: linear-gradient(135deg, #10b981, #059669);">JO</div>
+                        <div class="author-info">
+                            <span class="author-name">James O.</span>
+                            <span class="author-role">Backend Engineer at NexaCloud</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="section-container">
+            <div class="cta-card fade-up">
+                <h2>Start building in seconds</h2>
+                <p>No credit card required. Free tier available. Cancel anytime.</p>
+                <a href="#" class="btn btn-primary btn-large">Deploy Your First VM Free →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="section-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        TeleCloudX
+                    </a>
+                    <p>Deploy VMs in seconds, auto-scale with intelligence, and only pay for what you use. Built for developers who move fast.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">VMs</a></li>
+                        <li><a href="#">Storage</a></li>
+                        <li><a href="#">Networking</a></li>
+                        <li><a href="#">CDN</a></li>
+                        <li><a href="#">AI Co-Pilot</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Developers</h4>
+                    <ul>
+                        <li><a href="#">Docs</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Status</a></li>
+                        <li><a href="#">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 TeleCloudX. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Discord">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+
+        mobileMenuClose.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+
+        // Pricing toggle
+        const pricingToggle = document.getElementById('pricingToggle');
+        const isAnnual = false;
+
+        pricingToggle.addEventListener('click', () => {
+            pricingToggle.classList.toggle('active');
+            const isAnnual = pricingToggle.classList.contains('active');
+            
+            document.querySelectorAll('.pricing-price[data-monthly]').forEach(el => {
+                const monthly = el.getAttribute('data-monthly');
+                const annual = el.getAttribute('data-annual');
+                el.textContent = isAnnual ? annual : monthly;
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Counter animation
+        function animateCounter(el, target, duration = 2000) {
+            const start = 0;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = Math.floor(start + (target - start) * easeOut);
+                
+                el.textContent = current.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // Animate counters when visible
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+                    entry.target.classList.add('counted');
+                    const target = parseInt(entry.target.getAttribute('data-target'));
+                    if (target) {
+                        animateCounter(entry.target, target);
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.counter').forEach(el => {
+            counterObserver.observe(el);
+        });
+    </script>
+</body>
+</html>
