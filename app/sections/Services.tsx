@@ -1,41 +1,60 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Phone, Cloud, MessageSquare, Cpu, BarChart3, Shield, ChevronRight, ArrowUpRight } from "lucide-react";
 
 const services = [
   {
-    icon: "☁️",
-    title: "Cloud Infrastructure",
-    description: "Scalable cloud solutions with auto-scaling, load balancing, and high availability across global regions.",
+    id: "01",
+    icon: Phone,
+    title: "VMS",
+    subtitle: "Virtual Number System",
+    description: "Truly simple and flexible digital hosted solution. Get virtual numbers for any country, instant provisioning, and full SIP trunking with zero hardware.",
   },
   {
-    icon: "📡",
-    title: "Telecom Analytics",
-    description: "Real-time network monitoring, traffic analysis, and predictive maintenance for telecom operators.",
+    id: "02",
+    icon: Cloud,
+    title: "Cloud PBX",
+    subtitle: "Enterprise Phone System",
+    description: "Scalable carrier-grade PBX in the cloud with global numbers, auto-attendants, and zero hardware. Perfect for remote teams and multi-office setups.",
   },
   {
-    icon: "🤖",
-    title: "AI Insights",
-    description: "Machine learning models for anomaly detection, customer churn prediction, and revenue optimization.",
+    id: "03",
+    icon: MessageSquare,
+    title: "CPaaS APIs",
+    subtitle: "Communication Platform",
+    description: "Voice, SMS, and WhatsApp APIs ready to embed in any product within minutes. Programmable communications with global reach.",
   },
   {
-    icon: "🔒",
-    title: "Security Dashboard",
-    description: "Comprehensive security monitoring with threat detection, vulnerability scanning, and incident response.",
+    id: "04",
+    icon: Cpu,
+    title: "AI Voice",
+    subtitle: "Conversational AI",
+    description: "End-to-end conversational AI — from intent design to production agents that route, qualify, and close. Human-like voice automation at scale.",
   },
   {
-    icon: "📊",
-    title: "Real-Time Metrics",
-    description: "Live dashboards with customizable KPIs, alerting systems, and automated reporting tools.",
+    id: "05",
+    icon: BarChart3,
+    title: "IoT Telephony",
+    subtitle: "Connected Devices",
+    description: "Connect millions of devices with reliable, low-latency cellular and SIP networks. Built for IoT scale with secure device-to-cloud communication.",
   },
   {
-    icon: "🔌",
-    title: "API Integrations",
-    description: "Seamless integration with third-party services, billing systems, and OSS/BSS platforms.",
+    id: "06",
+    icon: Shield,
+    title: "Analytics",
+    subtitle: "Intelligence & Insights",
+    description: "Real-time dashboards, sentiment analysis, and call quality scoring out of the box. Turn every call into actionable business intelligence.",
   },
 ];
 
+const vmsContent = {
+  items: ["Instant Number Provisioning", "Global SIP Trunking", "IVR & Call Routing", "Voicemail & Recording"],
+  tools: ["SIP", "WebRTC", "Asterisk", "AWS"]
+};
+
 export default function Services() {
+  const [activeIdx, setActiveIdx] = useState(0);
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -58,58 +77,96 @@ export default function Services() {
     return () => observer.disconnect();
   }, []);
 
+  const active = services[activeIdx];
+  const ActiveIcon = active.icon;
+
   return (
-    <section id="features" ref={sectionRef} className="py-24 bg-[#050505] relative overflow-hidden">
+    <section id="services" ref={sectionRef} className="py-24 bg-[#050505] relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[120px]" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
-          <p className="text-sm text-purple-400 uppercase tracking-wider mb-4">Our Services</p>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-            What We{" "}
-            <span className="gradient-text">Deliver</span>
+        <div className="mb-10 flex items-start justify-between gap-6">
+          <h2 className="text-3xl font-semibold md:text-4xl text-white">
+            Our Services
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Comprehensive cloud and telecom solutions that transform your infrastructure 
-            and drive innovation across every touchpoint.
+          <p className="max-w-xs text-xs text-gray-500 leading-relaxed">
+            We offer comprehensive cloud-communication solutions that transform your business across every touchpoint.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              data-index={index}
-              className={`glass-card rounded-3xl p-8 transition-all duration-700 ${
-                visibleCards.has(index)
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: `${index * 100}ms` }}
-            >
-              <div className="text-4xl mb-6">{service.icon}</div>
-              <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{service.description}</p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {services.map((service, index) => {
+            const SIcon = service.icon;
+            const isActive = index === activeIdx;
+            return (
+              <div
+                key={service.id}
+                data-index={index}
+                onClick={() => setActiveIdx(index)}
+                className={`group relative overflow-hidden rounded-2xl border p-6 transition-all cursor-pointer ${
+                  isActive
+                    ? "border-purple-500/60 bg-purple-600/20"
+                    : "border-white/10 bg-white/5 hover:border-purple-500/40 hover:bg-white/10"
+                } ${visibleCards.has(index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+                style={{ transitionDelay: `${index * 100}ms`, transitionDuration: "700ms" }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                    isActive ? "bg-purple-500/20" : "bg-purple-500/10"
+                  }`}>
+                    <SIcon className={`h-5 w-5 ${isActive ? "text-purple-400" : "text-purple-500"}`} />
+                  </div>
+                  <span className={`text-sm font-mono ${isActive ? "text-purple-400/70" : "text-gray-600"}`}>
+                    {service.id}
+                  </span>
+                </div>
 
-              <div className="mt-6 flex items-center gap-2 text-purple-400 text-sm font-medium group cursor-pointer">
-                <span>Learn More</span>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  className="group-hover:translate-x-1 transition-transform"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
+                <div>
+                  <h3 className={`text-lg font-semibold ${isActive ? "text-white" : "text-white"}`}>
+                    {service.title}
+                  </h3>
+                  <p className="text-xs mt-0.5 font-medium text-gray-500">
+                    {service.subtitle}
+                  </p>
+                  <p className="mt-3 text-sm text-gray-400 leading-relaxed">
+                    {service.description}
+                  </p>
+                </div>
+
+                {/* Same items for all services */}
+                <div className={`mt-5 grid grid-cols-2 gap-3 border-t pt-4 text-xs ${isActive ? "border-white/20" : "border-white/10"}`}>
+                  <div>
+                    <div className={`mb-2 uppercase tracking-wider text-[10px] ${isActive ? "text-purple-400/60" : "text-gray-600"}`}>Services</div>
+                    <ul className="space-y-1.5">
+                      {vmsContent.items.map((it) => (
+                        <li key={it} className="flex items-center gap-1.5">
+                          <ChevronRight className={`h-3 w-3 ${isActive ? "text-purple-400/60" : "text-gray-600"}`} />
+                          <span className={isActive ? "text-gray-300" : "text-gray-500"}>{it}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <div className={`mb-2 uppercase tracking-wider text-[10px] ${isActive ? "text-purple-400/60" : "text-gray-600"}`}>Tools</div>
+                    <ul className="space-y-1.5">
+                      {vmsContent.tools.map((t) => (
+                        <li key={t} className="flex items-center gap-1.5">
+                          <ChevronRight className={`h-3 w-3 ${isActive ? "text-purple-400/60" : "text-gray-600"}`} />
+                          <span className={isActive ? "text-gray-300" : "text-gray-500"}>{t}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center gap-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className={isActive ? "text-purple-400/80" : "text-purple-500"}>Learn more</span>
+                  <ArrowUpRight className={`h-3.5 w-3.5 ${isActive ? "text-purple-400/80" : "text-purple-500"}`} />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
