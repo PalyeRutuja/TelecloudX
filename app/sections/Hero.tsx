@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ParticleBackground from "../components/ParticleBackground";
-import Sphere3D from "../components/Sphere3D";
+import { ArrowUpRight, Play } from "lucide-react";
+import data from "../data/landing.json";
+import ParticleSphere from "../components/ParticleSphere";
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,90 +13,105 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#050505]">
-      {/* Diagonal light beam */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+    <section className="relative mx-auto max-w-7xl px-6 pt-6 pb-16 md:pt-10 md:pb-24">
+      <div className="relative isolate">
+        {/* Floating orbs */}
         <div
-          className="diagonal-beam animate-glow-pulse"
-          style={{ left: "20%", top: "-25%" }}
+          aria-hidden
+          className="pointer-events-none absolute left-[10%] top-[20%] h-3 w-3 rounded-full bg-primary/60 animate-float blur-[2px]"
         />
-      </div>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-[15%] top-[40%] h-2 w-2 rounded-full bg-accent/80 animate-float blur-[1px]"
+          style={{ animationDelay: "1.5s" }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-[60%] bottom-[30%] h-4 w-4 rounded-full bg-primary/40 animate-float blur-[2px]"
+          style={{ animationDelay: "3s" }}
+        />
 
-      {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] animate-glow-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] animate-glow-pulse" style={{ animationDelay: "2s" }} />
+        {/* Top-left light leak */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-20 -top-10 h-72 w-72 -rotate-45 opacity-50 blur-3xl"
+          style={{ background: "linear-gradient(120deg, oklch(0.65 0.14 280 / 0.5), transparent 70%)" }}
+        />
 
-      {/* Particle background */}
-      <ParticleBackground />
+        {/* Giant ghost wordmark */}
+        <div className="pointer-events-none absolute inset-x-0 top-[22%] flex justify-center overflow-hidden">
+          <span className="select-none whitespace-nowrap text-[18vw] font-black tracking-tighter text-foreground/[0.035] md:text-[14vw]">
+            {data.brand.name.toUpperCase()}
+          </span>
+        </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side */}
-          <div className="space-y-8">
-            <h1
-              className={`text-5xl md:text-6xl lg:text-7xl font-black leading-tight transition-all duration-1000 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-            >
-              <span className="block text-white">
-                Transforming Ideas
-              </span>
-              <span className="block text-white">
-                Into{" "}
-                <span className="gradient-text">Digital</span>
-              </span>
-              <span className="block gradient-text">Experiences</span>
-            </h1>
-
-            <p
-              className={`text-gray-400 text-lg max-w-lg leading-relaxed transition-all duration-1000 delay-300 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-            >
-              Next-generation cloud infrastructure and telecom analytics powered by AI. 
-              Build, deploy, and scale with intelligence.
-            </p>
-
+        {/* Particle sphere absolute behind */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="relative h-[560px] w-[560px] max-w-full">
             <div
-              className={`flex flex-wrap gap-4 transition-all duration-1000 delay-500 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-            >
-              <a
-                href="#get-started"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
-              >
-                Get Started
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </a>
-              <a
-                href="#portfolio"
-                className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-white font-semibold rounded-full transition-all duration-300 hover:bg-white/5 hover:border-white/40"
-              >
-                View Portfolio
-              </a>
-            </div>
-          </div>
-
-          {/* Right side - 3D Sphere */}
-          <div
-            className={`flex justify-center items-center transition-all duration-1000 delay-700 relative z-20 ${
-              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"
-            }`}
-          >
-            <Sphere3D />
+              aria-hidden
+              className="absolute inset-10 rounded-full opacity-50 blur-3xl animate-pulse-glow"
+              style={{ background: "radial-gradient(circle, var(--primary-glow), transparent 60%)" }}
+            />
+            <ParticleSphere className="relative h-full w-full" count={1100} scale={0.42} />
           </div>
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-        <div className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-white/60 animate-bounce" />
+        {/* Centered headline overlay */}
+        <div className="relative flex min-h-[520px] flex-col items-center justify-center text-center">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] font-medium tracking-wide text-gray-400 backdrop-blur-sm mb-8 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-500 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500" />
+            </span>
+            {data.hero.eyebrow}
+          </div>
+          <h1
+            className={`text-balance text-4xl font-medium leading-[1.1] tracking-tight md:text-6xl lg:text-7xl transition-all duration-1000 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          >
+            Building <em className="not-italic font-semibold italic gradient-text">Cloud</em>
+            <br />
+            <em className="not-italic font-semibold italic gradient-text">Solutions</em> That Matter
+          </h1>
+          <p
+            className={`mt-6 max-w-lg text-sm text-gray-400 md:text-base transition-all duration-1000 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          >
+            {data.hero.subtitle}
+          </p>
+          <div
+            className={`mt-8 flex flex-wrap items-center justify-center gap-4 transition-all duration-1000 delay-300 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          >
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 bg-gradient-to-r from-purple-600 to-blue-600"
+            >
+              {data.hero.primaryCta}
+              <ArrowUpRight className="h-4 w-4" />
+            </a>
+            <a
+              href="#services"
+              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-medium text-white transition-all hover:border-purple-500/40 hover:bg-white/10"
+            >
+              <Play className="h-4 w-4 fill-white text-white" />
+              {data.hero.secondaryCta}
+            </a>
+          </div>
+        </div>
+
+        {/* Bottom stats row */}
+        <div className="relative mt-8 grid grid-cols-3 gap-6 border-t border-white/10 pt-8 md:gap-12">
+          {data.hero.stats.map((s, i) => (
+            <div
+              key={s.label}
+              className={`text-center transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+              style={{ transitionDelay: `${400 + i * 100}ms` }}
+            >
+              <div className="text-2xl font-bold md:text-4xl gradient-text">{s.value}</div>
+              <div className="mt-1.5 text-[11px] uppercase tracking-wider text-gray-500">{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
