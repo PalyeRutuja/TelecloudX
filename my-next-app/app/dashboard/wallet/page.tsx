@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Transaction {
   id: string;
@@ -16,17 +17,27 @@ export default function WalletPage() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchWalletData();
-  }, []);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    fetchWalletData(token);
+  }, [router]);
 
-  const fetchWalletData = async () => {
+  const fetchWalletData = async (token: string) => {
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch("/api/wallet", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        router.push("/login");
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setBalance(data.balance);

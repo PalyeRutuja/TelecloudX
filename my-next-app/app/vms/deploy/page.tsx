@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
 import { createUserVm } from "@/lib/vm-store";
 
 interface ServiceOffering {
@@ -47,30 +46,38 @@ export default function DeployVMPage() {
     zoneid: "",
   });
 
-  const getToken = async () => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      return currentUser.getIdToken();
-    }
-    return localStorage.getItem("token");
-  };
+  const getToken = () => localStorage.getItem("token");
 
-  const authHeaders = async () => {
-    const token = await getToken();
+  const authHeaders = () => {
+    const token = getToken();
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     };
   };
 
+  const handleAuthError = (response: Response) => {
+    if (response.status === 401) {
+      localStorage.removeItem("token");
+      router.push("/login");
+      return true;
+    }
+    return false;
+  };
+
   const fetchOptions = useCallback(async () => {
     try {
       setLoading(true);
-      const token = await getToken();
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
       const response = await fetch("/api/cloudstack/vms/deploy", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
 
       if (data.success) {
@@ -81,11 +88,6 @@ export default function DeployVMPage() {
           setWarning(data.warning);
         }
       } else {
-        if (response.status === 401) {
-          localStorage.removeItem("token");
-          router.push("/login");
-          return;
-        }
         setError(data.error || "Failed to fetch options");
       }
     } catch (err: unknown) {
@@ -97,7 +99,7 @@ export default function DeployVMPage() {
   }, [router]);
 
   const checkAuth = useCallback(async () => {
-    const token = await getToken();
+    const token = getToken();
     if (!token) {
       router.push("/login");
       return null;
@@ -106,6 +108,7 @@ export default function DeployVMPage() {
     const response = await fetch("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (handleAuthError(response)) return null;
     const data = await response.json();
     if (!data.success) {
       localStorage.removeItem("token");
@@ -114,7 +117,6 @@ export default function DeployVMPage() {
     }
 
     setUser(data.user);
-    localStorage.setItem("token", token);
     return data.user as { userId: string; name: string; email: string };
   }, [router]);
 
@@ -137,7 +139,7 @@ export default function DeployVMPage() {
     const selectedZone = zones.find((zone) => zone.id === formData.zoneid);
 
     try {
-      const headers = await authHeaders();
+      const headers = authHeaders();
       const response = await fetch("/api/cloudstack/vms/deploy", {
         method: "POST",
         headers,
@@ -150,6 +152,7 @@ export default function DeployVMPage() {
           memory: selectedOffering?.memory,
         }),
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
 
       if (data.success) {

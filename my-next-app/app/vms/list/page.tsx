@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
 import { listUserVms } from "@/lib/vm-store";
 
 interface VM {
@@ -28,12 +27,15 @@ export default function VMListPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ userId: string; name: string; email: string } | null>(null);
 
-  const getToken = async () => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      return currentUser.getIdToken();
+  const getToken = () => localStorage.getItem("token");
+
+  const handleAuthError = (response: Response) => {
+    if (response.status === 401) {
+      localStorage.removeItem("token");
+      router.push("/login");
+      return true;
     }
-    return localStorage.getItem("token");
+    return false;
   };
 
   const fetchVMs = useCallback(async (currentUser?: { userId: string; name: string; email: string }) => {
@@ -53,7 +55,7 @@ export default function VMListPage() {
 
   useEffect(() => {
     void (async () => {
-      const token = await getToken();
+      const token = getToken();
       if (!token) {
         router.push("/login");
         return;
@@ -61,6 +63,7 @@ export default function VMListPage() {
       const response = await fetch("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
       if (!data.success) {
         localStorage.removeItem("token");

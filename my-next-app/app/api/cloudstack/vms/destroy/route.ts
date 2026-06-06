@@ -15,11 +15,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const updated = await destroyVirtualMachine(id);
+    const result = await destroyVirtualMachine();
 
     return Response.json({
       success: true,
-      data: updated,
+      data: result?.destroyvirtualmachineresponse,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to destroy VM";

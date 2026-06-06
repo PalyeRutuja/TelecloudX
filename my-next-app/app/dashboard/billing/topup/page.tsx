@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import QRCode from "qrcode";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface PaymentMethod {
   id: string;
@@ -72,10 +73,27 @@ export default function AddCreditsPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [balance, setBalance] = useState(0);
   const [transactionId, setTransactionId] = useState<string>("");
+  const router = useRouter();
+
+  const getToken = () => localStorage.getItem("token");
+
+  const handleAuthError = (response: Response) => {
+    if (response.status === 401) {
+      localStorage.removeItem("token");
+      router.push("/login");
+      return true;
+    }
+    return false;
+  };
 
   const amount = customAmount ? parseFloat(customAmount) : selectedAmount;
 
   useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push("/login");
+      return;
+    }
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     ));
@@ -90,10 +108,15 @@ export default function AddCreditsPage() {
 
   const fetchBalance = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
       const response = await fetch("/api/wallet", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
       if (data.success) {
         setBalance(data.balance);
@@ -121,7 +144,11 @@ export default function AddCreditsPage() {
   };
 
   const createTransaction = async () => {
-    const token = localStorage.getItem("token");
+    const token = getToken();
+    if (!token) {
+      router.push("/login");
+      throw new Error("Not authenticated");
+    }
     const response = await fetch("/api/wallet/topup", {
       method: "POST",
       headers: {
@@ -134,11 +161,16 @@ export default function AddCreditsPage() {
         provider: selectedMethod,
       }),
     });
+    if (handleAuthError(response)) throw new Error("Session expired");
     return response.json();
   };
 
   const verifyPayment = async (status: "SUCCESS" | "FAILED", providerData?: any) => {
-    const token = localStorage.getItem("token");
+    const token = getToken();
+    if (!token) {
+      router.push("/login");
+      throw new Error("Not authenticated");
+    }
     const response = await fetch("/api/wallet/verify", {
       method: "POST",
       headers: {
@@ -151,6 +183,7 @@ export default function AddCreditsPage() {
         ...providerData,
       }),
     });
+    if (handleAuthError(response)) throw new Error("Session expired");
     return response.json();
   };
 
@@ -194,7 +227,12 @@ export default function AddCreditsPage() {
       }
       setTransactionId(txn.transaction.id);
 
-      const token = localStorage.getItem("token");
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        setLoading(false);
+        return;
+      }
       const orderResponse = await fetch("/api/payments/razorpay/create-order", {
         method: "POST",
         headers: {
@@ -207,7 +245,10 @@ export default function AddCreditsPage() {
           receipt: txn.transaction.id,
         }),
       });
-      
+      if (handleAuthError(orderResponse)) {
+        setLoading(false);
+        return;
+      }
       const orderData = await orderResponse.json();
       if (!orderData.success) {
         throw new Error(orderData.error || "Failed to create order");
@@ -225,11 +266,17 @@ export default function AddCreditsPage() {
           description: `Add $${amount} credits`,
           order_id: orderData.order.id,
           handler: async (response: any) => {
+            const verifyToken = getToken();
+            if (!verifyToken) {
+              router.push("/login");
+              setLoading(false);
+              return;
+            }
             const verifyResponse = await fetch("/api/payments/razorpay/verify", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${verifyToken}`,
               },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
@@ -237,7 +284,10 @@ export default function AddCreditsPage() {
                 razorpay_signature: response.razorpay_signature,
               }),
             });
-            
+            if (handleAuthError(verifyResponse)) {
+              setLoading(false);
+              return;
+            }
             const verifyData = await verifyResponse.json();
             if (verifyData.success) {
               const result = await verifyPayment("SUCCESS", {
@@ -277,7 +327,12 @@ export default function AddCreditsPage() {
       }
       setTransactionId(txn.transaction.id);
 
-      const token = localStorage.getItem("token");
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        setLoading(false);
+        return;
+      }
       const response = await fetch("/api/payments/stripe/create-session", {
         method: "POST",
         headers: {
@@ -291,6 +346,10 @@ export default function AddCreditsPage() {
         }),
       });
       
+      if (handleAuthError(response)) {
+        setLoading(false);
+        return;
+      }
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.error || "Failed to create checkout");

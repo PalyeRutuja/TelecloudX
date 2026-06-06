@@ -15,11 +15,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const updated = await stopVirtualMachine(id);
+    const result = await stopVirtualMachine();
 
     return Response.json({
       success: true,
-      data: updated,
+      data: result?.stopvirtualmachineresponse,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to stop VM";

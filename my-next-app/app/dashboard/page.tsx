@@ -2,17 +2,29 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [balance, setBalance] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
     const fetchBalance = async () => {
       try {
-        const token = localStorage.getItem("token");
         const response = await fetch("/api/wallet", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          router.push("/login");
+          return;
+        }
         const data = await response.json();
         if (data.success) {
           setBalance(data.balance);
@@ -22,7 +34,7 @@ export default function DashboardPage() {
       }
     };
     fetchBalance();
-  }, []);
+  }, [router]);
 
   return (
     <div className="p-8">

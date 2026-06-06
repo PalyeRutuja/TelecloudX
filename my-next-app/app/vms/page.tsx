@@ -5,8 +5,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { deleteUserVm, listUserVms, updateUserVm } from "@/lib/vm-store";
 
 interface VM {
@@ -31,24 +29,27 @@ export default function VMDashboard() {
   const [user, setUser] = useState<{ userId: string; name: string; email: string } | null>(null);
   const router = useRouter();
 
-  const getToken = async () => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      return currentUser.getIdToken();
-    }
-    return localStorage.getItem("token");
-  };
+  const getToken = () => localStorage.getItem("token");
 
-  const authHeaders = async () => {
-    const token = await getToken();
+  const authHeaders = () => {
+    const token = getToken();
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     };
   };
 
+  const handleAuthError = (response: Response) => {
+    if (response.status === 401) {
+      localStorage.removeItem("token");
+      router.push("/login");
+      return true;
+    }
+    return false;
+  };
+
   const checkAuth = async () => {
-    const token = await getToken();
+    const token = getToken();
     if (!token) {
       router.push("/login");
       return false;
@@ -58,10 +59,10 @@ export default function VMDashboard() {
       const response = await fetch("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (handleAuthError(response)) return false;
       const data = await response.json();
       if (data.success) {
         setUser(data.user);
-        localStorage.setItem("token", token);
         return data.user as { userId: string; name: string; email: string };
       } else {
         localStorage.removeItem("token");
@@ -101,12 +102,13 @@ export default function VMDashboard() {
   const handleStart = async (id: string) => {
     setActionLoading(id);
     try {
-      const headers = await authHeaders();
+      const headers = authHeaders();
       const response = await fetch("/api/cloudstack/vms/start", {
         method: "POST",
         headers,
         body: JSON.stringify({ id }),
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
       if (data.success) {
         if (user) {
@@ -127,12 +129,13 @@ export default function VMDashboard() {
   const handleStop = async (id: string) => {
     setActionLoading(id);
     try {
-      const headers = await authHeaders();
+      const headers = authHeaders();
       const response = await fetch("/api/cloudstack/vms/stop", {
         method: "POST",
         headers,
         body: JSON.stringify({ id }),
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
       if (data.success) {
         if (user) {
@@ -154,15 +157,16 @@ export default function VMDashboard() {
     if (!confirm("Are you sure you want to destroy this VM? This action cannot be undone.")) {
       return;
     }
-    
+
     setActionLoading(id);
     try {
-      const headers = await authHeaders();
+      const headers = authHeaders();
       const response = await fetch("/api/cloudstack/vms/destroy", {
         method: "POST",
         headers,
         body: JSON.stringify({ id }),
       });
+      if (handleAuthError(response)) return;
       const data = await response.json();
       if (data.success) {
         if (user) {
@@ -181,7 +185,6 @@ export default function VMDashboard() {
   };
 
   const handleLogout = () => {
-    void signOut(auth);
     localStorage.removeItem("token");
     router.push("/login");
   };

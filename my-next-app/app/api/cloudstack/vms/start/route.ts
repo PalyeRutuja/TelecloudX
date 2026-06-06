@@ -15,11 +15,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const updated = await startVirtualMachine(id);
+    const result = await startVirtualMachine();
 
     return Response.json({
       success: true,
-      data: updated,
+      data: result?.startvirtualmachineresponse,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to start VM";
