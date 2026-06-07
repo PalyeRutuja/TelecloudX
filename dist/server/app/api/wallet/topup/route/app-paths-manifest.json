@@ -1,0 +1,3 @@
+{
+  "/api/wallet/topup/route": "app/api/wallet/topup/route.js"
+}

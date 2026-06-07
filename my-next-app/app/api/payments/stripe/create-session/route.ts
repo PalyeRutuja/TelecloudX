@@ -5,6 +5,13 @@ export async function POST(request: Request) {
   const auth = await requireAuth(request);
   if (auth instanceof Response) return auth;
 
+  if (!stripe) {
+    return Response.json(
+      { error: "Stripe not configured" },
+      { status: 503 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { amount, currency = "USD", transactionId } = body;

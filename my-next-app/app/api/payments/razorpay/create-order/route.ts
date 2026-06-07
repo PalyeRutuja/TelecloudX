@@ -5,6 +5,13 @@ export async function POST(request: Request) {
   const auth = await requireAuth(request);
   if (auth instanceof Response) return auth;
 
+  if (!razorpay) {
+    return Response.json(
+      { error: "Razorpay not configured" },
+      { status: 503 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { amount, currency = "INR", receipt } = body;

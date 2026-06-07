@@ -1,0 +1,3 @@
+{
+  "/api/payments/razorpay/create-order/route": "app/api/payments/razorpay/create-order/route.js"
+}
