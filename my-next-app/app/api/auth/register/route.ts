@@ -1,45 +1,71 @@
-import { createUser, findUserByEmail, hashPassword, generateJWT } from "@/lib/jwt-auth";
+/**
+ * POST /api/auth/register
+ * -----------------------
+ * Creates a new user account with name, email, and password.
+ * Validates: password match, min 6 chars, email uniqueness.
+ * Returns: { success, token, user } on success.
+ */
 
-export async function POST(request: Request) {
+import { NextRequest, NextResponse } from "next/server";
+import { hashPassword, generateJWT, createUser, findUserByEmail } from "@/lib/jwt-auth";
+
+export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
+    const { name, email, password, confirmPassword } = body;
 
-    if (!name || !email || !password) {
-      return Response.json(
-        { error: "Name, email, and password are required" },
+    // Validation
+    if (!name || !email || !password || !confirmPassword) {
+      return NextResponse.json(
+        { error: "All fields are required: name, email, password, confirmPassword" },
+        { status: 400 }
+      );
+    }
+
+    if (password !== confirmPassword) {
+      return NextResponse.json(
+        { error: "Passwords do not match" },
         { status: 400 }
       );
     }
 
     if (password.length < 6) {
-      return Response.json(
+      return NextResponse.json(
         { error: "Password must be at least 6 characters" },
         { status: 400 }
       );
     }
 
+    // Check if email already exists
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
-      return Response.json(
-        { error: "User with this email already exists" },
+      return NextResponse.json(
+        { error: "An account with this email already exists" },
         { status: 409 }
       );
     }
+
+    // Hash password and create user
     const passwordHash = await hashPassword(password);
     const user = await createUser(name, email, passwordHash);
+
+    // Generate JWT token
     const token = await generateJWT(user);
 
-    return Response.json({
+    return NextResponse.json({
       success: true,
       token,
       user: {
-        userId: user.id,
-        email: user.email,
+        id: user.id,
         name: user.name,
+        email: user.email,
       },
-    });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Registration failed";
-    return Response.json({ error: message }, { status: 500 });
+    }, { status: 201 });
+  } catch (error: any) {
+    console.error("[POST /api/auth/register] Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Registration failed" },
+      { status: 500 }
+    );
   }
 }

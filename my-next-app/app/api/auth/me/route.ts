@@ -1,9 +1,24 @@
-import { requireAuth } from "@/lib/middleware";
+import { verifyJWT } from "@/lib/jwt-auth";
 
 export async function GET(request: Request) {
   try {
-    const payload = await requireAuth(request);
-    if (payload instanceof Response) return payload;
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return Response.json(
+        { error: "Unauthorized - No token provided" },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const payload = await verifyJWT(token);
+
+    if (!payload) {
+      return Response.json(
+        { error: "Unauthorized - Invalid or expired token" },
+        { status: 401 }
+      );
+    }
 
     return Response.json({
       success: true,
@@ -11,6 +26,10 @@ export async function GET(request: Request) {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Authentication failed";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("Auth check failed:", error);
+    return Response.json(
+      { error: message },
+      { status: 500 }
+    );
   }
 }
