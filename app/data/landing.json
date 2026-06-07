@@ -1,0 +1,76 @@
+{
+  "brand": {
+    "name": "TelecloudX",
+    "tagline": "Cloud Telephony, Reimagined"
+  },
+  "nav": [
+    { "label": "Platform", "href": "#platform" },
+    { "label": "Services", "href": "#services" },
+    { "label": "Contact", "href": "#contact" }
+  ],
+  "hero": {
+    "eyebrow": "TELECLOUDX // CLOUD COMMUNICATIONS",
+    "title": "Building Cloud Communications That Matter",
+    "subtitle": "We empower organizations with AI-driven cloud telephony, intelligent routing, and real-time analytics that scale with you.",
+    "primaryCta": "Start Your Project",
+    "secondaryCta": "Watch The Demo",
+    "stats": [
+      { "value": "45+", "label": "Projects Delivered" },
+      { "value": "99.9%", "label": "Uptime SLA" },
+      { "value": "24/7", "label": "Support Available" }
+    ]
+  },
+  "intro": {
+    "kicker": "COMPANIES CREATE PRODUCTS. TELECLOUDX CREATES IMPACT.",
+    "headline": "We're a design-led cloud studio turning complex telecom challenges into measurable results."
+  },
+  "services": [
+    {
+      "id": "01",
+      "title": "VMS",
+      "subtitle": "Virtual Number System",
+      "desc": "Truly simple and flexible digital hosted solution. Get virtual numbers for any country, instant provisioning, and full SIP trunking with zero hardware."
+    },
+    {
+      "id": "02",
+      "title": "Cloud PBX",
+      "subtitle": "Enterprise Phone System",
+      "desc": "Scalable carrier-grade PBX in the cloud with global numbers, auto-attendants, and zero hardware. Perfect for remote teams and multi-office setups."
+    },
+    {
+      "id": "03",
+      "title": "CPaaS APIs",
+      "subtitle": "Communication Platform",
+      "desc": "Voice, SMS, and WhatsApp APIs ready to embed in any product within minutes. Programmable communications with global reach."
+    },
+    {
+      "id": "04",
+      "title": "AI Voice",
+      "subtitle": "Conversational AI",
+      "desc": "End-to-end conversational AI — from intent design to production agents that route, qualify, and close. Human-like voice automation at scale."
+    },
+    {
+      "id": "05",
+      "title": "IoT Telephony",
+      "subtitle": "Connected Devices",
+      "desc": "Connect millions of devices with reliable, low-latency cellular and SIP networks. Built for IoT scale with secure device-to-cloud communication."
+    },
+    {
+      "id": "06",
+      "title": "Analytics",
+      "subtitle": "Intelligence & Insights",
+      "desc": "Real-time dashboards, sentiment analysis, and call quality scoring out of the box. Turn every call into actionable business intelligence."
+    }
+  ],
+  "cta": {
+    "kicker": "We move fast — but never at the cost of quality or integrity.",
+    "title": "Let's Build Something",
+    "titleAccent": "That Connects",
+    "body": "We're built to build for good, for growth, and for the greater impact. What will we build with you?",
+    "primary": "Start a Project",
+    "secondary": "Explore Our Work"
+  },
+  "footer": {
+    "copyright": "© 2026 TelecloudX. All rights reserved."
+  }
+}

@@ -1,0 +1,3 @@
+{
+  "/api/cloudstack/vms/start/route": "app/api/cloudstack/vms/start/route.js"
+}

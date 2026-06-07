@@ -1,0 +1,261 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "onMatchHeaders": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/auth/login",
+      "regex": "^/api/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/login(?:/)?$"
+    },
+    {
+      "page": "/api/auth/me",
+      "regex": "^/api/auth/me(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/me(?:/)?$"
+    },
+    {
+      "page": "/api/auth/register",
+      "regex": "^/api/auth/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/register(?:/)?$"
+    },
+    {
+      "page": "/api/cloudstack/test",
+      "regex": "^/api/cloudstack/test(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cloudstack/test(?:/)?$"
+    },
+    {
+      "page": "/api/cloudstack/vms/deploy",
+      "regex": "^/api/cloudstack/vms/deploy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cloudstack/vms/deploy(?:/)?$"
+    },
+    {
+      "page": "/api/cloudstack/vms/destroy",
+      "regex": "^/api/cloudstack/vms/destroy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cloudstack/vms/destroy(?:/)?$"
+    },
+    {
+      "page": "/api/cloudstack/vms/list",
+      "regex": "^/api/cloudstack/vms/list(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cloudstack/vms/list(?:/)?$"
+    },
+    {
+      "page": "/api/cloudstack/vms/start",
+      "regex": "^/api/cloudstack/vms/start(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cloudstack/vms/start(?:/)?$"
+    },
+    {
+      "page": "/api/cloudstack/vms/stop",
+      "regex": "^/api/cloudstack/vms/stop(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cloudstack/vms/stop(?:/)?$"
+    },
+    {
+      "page": "/api/payments/razorpay/create-order",
+      "regex": "^/api/payments/razorpay/create\\-order(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments/razorpay/create\\-order(?:/)?$"
+    },
+    {
+      "page": "/api/payments/razorpay/verify",
+      "regex": "^/api/payments/razorpay/verify(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments/razorpay/verify(?:/)?$"
+    },
+    {
+      "page": "/api/payments/simulate/bank",
+      "regex": "^/api/payments/simulate/bank(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments/simulate/bank(?:/)?$"
+    },
+    {
+      "page": "/api/payments/simulate/upi",
+      "regex": "^/api/payments/simulate/upi(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments/simulate/upi(?:/)?$"
+    },
+    {
+      "page": "/api/payments/simulate/wallet",
+      "regex": "^/api/payments/simulate/wallet(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments/simulate/wallet(?:/)?$"
+    },
+    {
+      "page": "/api/payments/stripe/create-session",
+      "regex": "^/api/payments/stripe/create\\-session(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments/stripe/create\\-session(?:/)?$"
+    },
+    {
+      "page": "/api/razorpay/create-order",
+      "regex": "^/api/razorpay/create\\-order(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/razorpay/create\\-order(?:/)?$"
+    },
+    {
+      "page": "/api/razorpay/verify",
+      "regex": "^/api/razorpay/verify(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/razorpay/verify(?:/)?$"
+    },
+    {
+      "page": "/api/razorpay/webhook",
+      "regex": "^/api/razorpay/webhook(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/razorpay/webhook(?:/)?$"
+    },
+    {
+      "page": "/api/wallet",
+      "regex": "^/api/wallet(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/wallet(?:/)?$"
+    },
+    {
+      "page": "/api/wallet/topup",
+      "regex": "^/api/wallet/topup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/wallet/topup(?:/)?$"
+    },
+    {
+      "page": "/api/wallet/verify",
+      "regex": "^/api/wallet/verify(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/wallet/verify(?:/)?$"
+    },
+    {
+      "page": "/cloudstack-test",
+      "regex": "^/cloudstack\\-test(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cloudstack\\-test(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/dashboard/billing/topup",
+      "regex": "^/dashboard/billing/topup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/billing/topup(?:/)?$"
+    },
+    {
+      "page": "/dashboard/wallet",
+      "regex": "^/dashboard/wallet(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/wallet(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/payments",
+      "regex": "^/payments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/payments(?:/)?$"
+    },
+    {
+      "page": "/register",
+      "regex": "^/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/register(?:/)?$"
+    },
+    {
+      "page": "/upi",
+      "regex": "^/upi(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/upi(?:/)?$"
+    },
+    {
+      "page": "/vms",
+      "regex": "^/vms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/vms(?:/)?$"
+    },
+    {
+      "page": "/vms/deploy",
+      "regex": "^/vms/deploy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/vms/deploy(?:/)?$"
+    },
+    {
+      "page": "/vms/list",
+      "regex": "^/vms/list(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/vms/list(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}
