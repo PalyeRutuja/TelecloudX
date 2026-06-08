@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Play } from "lucide-react";
 import data from "../data/landing.json";
-import ParticleSphere from "../components/ParticleSphere";
+import { ParticleSphere } from "../components/ParticleSphere";
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
@@ -40,7 +40,14 @@ export default function Hero() {
 
         {/* Giant ghost wordmark */}
         <div className="pointer-events-none absolute inset-x-0 top-[22%] flex justify-center overflow-hidden">
-          <span className="select-none whitespace-nowrap text-[18vw] font-black tracking-tighter text-foreground/[0.035] md:text-[14vw]">
+          <span 
+            className="select-none whitespace-nowrap text-[18vw] font-black tracking-tighter md:text-[14vw]"
+            style={{
+              WebkitTextStroke: '1px rgba(255,255,255,0.15)',
+              WebkitTextFillColor: 'transparent',
+              filter: 'blur(2px)',
+            }}
+          >
             {data.brand.name.toUpperCase()}
           </span>
         </div>

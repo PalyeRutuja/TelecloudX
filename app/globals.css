@@ -1,11 +1,10 @@
 @import "tailwindcss";
 
-@theme inline {
+:root {
   --color-background: #050505;
   --color-foreground: #ffffff;
   --font-sans: var(--font-inter);
   --font-heading: var(--font-space-grotesk);
-  
   --color-primary: #6366f1;
   --color-primary-light: #818cf8;
   --color-accent-purple: #a855f7;
@@ -17,9 +16,6 @@
   --color-text-primary: #ffffff;
   --color-text-secondary: #9ca3af;
   --color-text-muted: #6b7280;
-}
-
-:root {
   --gradient-primary: linear-gradient(135deg, #6366f1, #a855f7, #818cf8);
   --gradient-hero: radial-gradient(ellipse at top left, rgba(99,102,241,0.15), transparent 55%), radial-gradient(ellipse at bottom right, rgba(168,85,247,0.12), transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.08), transparent 70%);
   --shadow-glow: 0 0 60px rgba(99,102,241,0.3), 0 0 100px rgba(168,85,247,0.1);
