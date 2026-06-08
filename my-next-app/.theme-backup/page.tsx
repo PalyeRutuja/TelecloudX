@@ -540,22 +540,22 @@ function AddCreditsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Header */}
-      <header className="border-b border-[#1a1a2e] bg-[#050505]/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-zinc-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-[#9ca3af] hover:text-white transition-colors">
+            <Link href="/dashboard" className="text-zinc-400 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </Link>
             <div>
               <h1 className="text-xl font-bold">Add Credits</h1>
-              <p className="text-sm text-[#9ca3af]">Choose an amount and complete checkout with your preferred gateway</p>
+              <p className="text-sm text-zinc-400">Choose an amount and complete checkout with your preferred gateway</p>
             </div>
           </div>
-          <div className="text-sm text-[#9ca3af]">
+          <div className="text-sm text-zinc-400">
             Balance: <span className="text-white font-semibold">${balance.toFixed(2)}</span>
           </div>
         </div>
@@ -580,12 +580,12 @@ function AddCreditsContent() {
           {/* Left Panel - Amount Selection */}
           <div className="space-y-6">
             {/* Amount Selection Card */}
-            <div className="bg-[#0a0a0f] border border-[#1a1a2e] rounded-2xl p-6">
+            <div className="bg-[#111113] border border-zinc-800/60 rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-yellow-400">⚡</span>
                 <h2 className="text-lg font-semibold">Select Amount</h2>
               </div>
-              <p className="text-sm text-[#9ca3af] mb-4">Choose a preset amount or enter a custom top-up value</p>
+              <p className="text-sm text-zinc-400 mb-4">Choose a preset amount or enter a custom top-up value</p>
               
               <div className="grid grid-cols-3 gap-3 mb-6">
                 {PRESET_AMOUNTS.map((preset) => (
@@ -597,8 +597,8 @@ function AddCreditsContent() {
                     }}
                     className={`py-3 px-4 rounded-xl border-2 font-semibold text-lg transition-all ${
                       selectedAmount === preset && !customAmount
-                        ? "border-purple-600 bg-purple-600/10 text-purple-400"
-                        : "border-[#1a1a2e] hover:border-purple-500/30 text-[#d1d5db]"
+                        ? "border-blue-600 bg-blue-600/10 text-blue-400"
+                        : "border-zinc-700 hover:border-zinc-600 text-zinc-300"
                     }`}
                   >
                     ${preset}
@@ -607,9 +607,9 @@ function AddCreditsContent() {
               </div>
 
               <div className="mb-6">
-                <p className="text-sm text-[#9ca3af] mb-2">Or enter custom amount</p>
+                <p className="text-sm text-zinc-400 mb-2">Or enter custom amount</p>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6b7280]">$</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
                   <input
                     type="number"
                     value={customAmount}
@@ -619,26 +619,26 @@ function AddCreditsContent() {
                     }}
                     placeholder="Enter amount"
                     min="5"
-                    className="w-full pl-8 pr-4 py-3 bg-white/[0.03] border border-[#1a1a2e] rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-8 pr-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
-                <p className="text-xs text-[#6b7280] mt-1">Minimum $5</p>
+                <p className="text-xs text-zinc-500 mt-1">Minimum $5</p>
               </div>
 
               {/* Summary */}
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#9ca3af]">Amount</span>
+                  <span className="text-zinc-400">Amount</span>
                   <span className="text-white">${amount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#9ca3af]">Total Credits</span>
-                  <span className="text-purple-400 font-semibold">${amount.toFixed(2)}</span>
+                  <span className="text-zinc-400">Total Credits</span>
+                  <span className="text-blue-400 font-semibold">${amount.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Promo Code */}
-              <div className="bg-white/[0.02] border border-[#1a1a2e] rounded-xl p-4">
+              <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-xl p-4">
                 <p className="text-sm font-medium mb-2">Promo Code</p>
                 <div className="flex gap-2">
                   <input
@@ -646,9 +646,9 @@ function AddCreditsContent() {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Enter code"
-                    className="flex-1 px-4 py-2 bg-white/[0.03] border border-[#1a1a2e] rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 text-sm"
+                    className="flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-600 text-sm"
                   />
-                  <button className="px-4 py-2 bg-white/[0.05] hover:bg-white/[0.08] rounded-lg text-sm font-medium transition-colors border border-white/10">
+                  <button className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition-colors border border-zinc-700/50">
                     Apply
                   </button>
                 </div>
@@ -658,12 +658,12 @@ function AddCreditsContent() {
 
           {/* Right Panel - Payment Methods */}
           <div className="space-y-6">
-            <div className="bg-[#0a0a0f] border border-[#1a1a2e] rounded-2xl p-6">
+            <div className="bg-[#111113] border border-zinc-800/60 rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-blue-400">💳</span>
                 <h2 className="text-lg font-semibold">Payment Method</h2>
               </div>
-              <p className="text-sm text-[#9ca3af] mb-4">Every option shown here is now wired to a real backend flow</p>
+              <p className="text-sm text-zinc-400 mb-4">Every option shown here is now wired to a real backend flow</p>
 
               <div className="space-y-3">
                 {PAYMENT_METHODS.map((method) => (
@@ -671,13 +671,13 @@ function AddCreditsContent() {
                     key={method.id}
                     className={`relative border rounded-xl p-4 cursor-pointer transition-all ${
                       selectedMethod === method.id
-                        ? "border-purple-600 bg-purple-600/5"
-                        : "border-[#1a1a2e] hover:border-purple-500/30"
+                        ? "border-blue-600 bg-blue-600/5"
+                        : "border-zinc-700 hover:border-zinc-600"
                     }`}
                     onClick={() => setSelectedMethod(method.id)}
                   >
                     {method.featured && (
-                      <span className="absolute -top-2 left-4 px-2 py-0.5 bg-purple-600 text-white text-xs font-medium rounded-full">
+                      <span className="absolute -top-2 left-4 px-2 py-0.5 bg-blue-600 text-white text-xs font-medium rounded-full">
                         Featured
                       </span>
                     )}
@@ -692,20 +692,20 @@ function AddCreditsContent() {
                             <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded">Active</span>
                           )}
                         </div>
-                        <p className="text-sm text-[#9ca3af]">{method.description}</p>
+                        <p className="text-sm text-zinc-400">{method.description}</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedMethod === method.id ? "border-purple-600" : "border-zinc-600"
+                        selectedMethod === method.id ? "border-blue-600" : "border-zinc-600"
                       }`}>
                         {selectedMethod === method.id && (
-                          <div className="w-2.5 h-2.5 bg-purple-600 rounded-full" />
+                          <div className="w-2.5 h-2.5 bg-blue-600 rounded-full" />
                         )}
                       </div>
                     </div>
 
                     {/* UPI Details */}
                     {selectedMethod === "upi" && method.id === "upi" && (
-                      <div className="mt-4 pt-4 border-t border-[#1a1a2e]">
+                      <div className="mt-4 pt-4 border-t border-zinc-700/50">
                         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2 mb-4">
                           <span className="text-yellow-400 text-sm">🏷️ Demo/Sandbox Mode</span>
                         </div>
@@ -714,7 +714,7 @@ function AddCreditsContent() {
                           <div className="space-y-2">
                             <button
                               onClick={() => window.location.href = getUPIIntentUrl()}
-                              className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-purple-600/20"
+                              className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-600/20"
                             >
                               Open UPI App
                             </button>
@@ -729,7 +729,7 @@ function AddCreditsContent() {
                             <div className="flex gap-2 mb-4">
                               <button
                                 onClick={() => navigator.clipboard.writeText("telecloudx@okaxis")}
-                                className="px-4 py-2 bg-white/[0.05] hover:bg-white/[0.08] rounded-lg text-sm transition-colors border border-white/10"
+                                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors border border-zinc-700/50"
                               >
                                 Copy UPI ID
                               </button>
@@ -742,7 +742,7 @@ function AddCreditsContent() {
                             <button
                               key={app}
                               onClick={() => window.location.href = getUPIIntentUrl()}
-                              className="py-2 px-3 bg-white/[0.05] hover:bg-white/[0.08] rounded-lg text-sm transition-colors border border-white/10"
+                              className="py-2 px-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors border border-zinc-700/50"
                             >
                               Open {app}
                             </button>
@@ -752,7 +752,7 @@ function AddCreditsContent() {
                         <button
                           onClick={handleUPIPayment}
                           disabled={loading || amount <= 0}
-                          className="w-full mt-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium transition-all duration-200 shadow-lg shadow-purple-600/20"
+                          className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-600/20"
                         >
                           {loading ? "Processing..." : `Pay $${amount} via UPI`}
                         </button>
@@ -761,22 +761,22 @@ function AddCreditsContent() {
 
                     {/* Crypto Details */}
                     {selectedMethod === "crypto" && method.id === "crypto" && (
-                      <div className="mt-4 pt-4 border-t border-[#1a1a2e] space-y-4">
-                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-2">
-                          <span className="text-purple-400 text-sm font-medium">XDC Apothem Testnet</span>
-                          <p className="text-xs text-[#9ca3af] mt-1">Send native XDC to add credits</p>
+                      <div className="mt-4 pt-4 border-t border-zinc-700/50 space-y-4">
+                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+                          <span className="text-blue-400 text-sm font-medium">XDC Apothem Testnet</span>
+                          <p className="text-xs text-zinc-400 mt-1">Send native XDC to add credits</p>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-medium text-[#d1d5db]">Your wallet address</label>
+                          <label className="text-sm font-medium text-zinc-300">Your wallet address</label>
                           <input
                             type="text"
                             value={cryptoWalletAddress}
                             onChange={(e) => setCryptoWalletAddress(e.target.value)}
                             placeholder="0x..."
-                            className="w-full px-4 py-3 bg-white/[0.03] border border-[#1a1a2e] rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+                            className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-600 transition-colors"
                           />
-                          <p className="text-xs text-[#6b7280]">
+                          <p className="text-xs text-zinc-500">
                             This must match your connected MetaMask account on XDC Apothem Testnet.
                           </p>
                         </div>
@@ -785,7 +785,7 @@ function AddCreditsContent() {
                           <button
                             onClick={connectMetaMask}
                             disabled={!metamaskAvailable || walletConnecting}
-                            className="w-full py-3 bg-white/[0.05] hover:bg-white/[0.08] disabled:opacity-50 rounded-xl font-medium transition-colors border border-white/10"
+                            className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-700 rounded-xl font-medium transition-colors border border-zinc-700/50"
                           >
                             {walletConnecting
                               ? "Connecting wallet..."
@@ -795,13 +795,13 @@ function AddCreditsContent() {
                                   ? "Connect MetaMask"
                                   : "MetaMask not detected"}
                           </button>
-                          <div className="text-xs text-[#6b7280]">
-                            Treasury address: <span className="text-[#d1d5db] break-all">{CRYPTO_TREASURY_ADDRESS || "Not configured"}</span>
+                          <div className="text-xs text-zinc-500">
+                            Treasury address: <span className="text-zinc-300 break-all">{CRYPTO_TREASURY_ADDRESS || "Not configured"}</span>
                           </div>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-medium text-[#d1d5db]">XDC Amount to Send</label>
+                          <label className="text-sm font-medium text-zinc-300">XDC Amount to Send</label>
                           <div className="relative">
                             <input
                               type="number"
@@ -810,17 +810,17 @@ function AddCreditsContent() {
                               placeholder="Enter XDC amount"
                               min="0.001"
                               step="0.001"
-                              className="w-full px-4 py-3 bg-white/[0.03] border border-[#1a1a2e] rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+                              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-600 transition-colors"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6b7280] text-sm">XDC</span>
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">XDC</span>
                           </div>
-                          <p className="text-xs text-[#6b7280]">
-                            Credits to add: <span className="text-purple-400 font-semibold">${amount.toFixed(2)}</span>
+                          <p className="text-xs text-zinc-500">
+                            Credits to add: <span className="text-blue-400 font-semibold">${amount.toFixed(2)}</span>
                           </p>
                         </div>
 
                         {cryptoTxHash && (
-                          <div className="rounded-xl border border-[#1a1a2e] bg-white/[0.02] p-3 text-xs text-[#d1d5db] break-all">
+                          <div className="rounded-xl border border-zinc-700 bg-zinc-800/40 p-3 text-xs text-zinc-300 break-all">
                             Tx Hash: {cryptoTxHash}
                           </div>
                         )}
@@ -828,7 +828,7 @@ function AddCreditsContent() {
                         <button
                           onClick={handleCryptoPayment}
                           disabled={loading || amount <= 0 || !xdcAmount}
-                          className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium transition-all duration-200 shadow-lg shadow-purple-600/20"
+                          className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-600/20"
                         >
                           {loading ? "Processing XDC payment..." : `Pay ${xdcAmount || "0"} XDC to Add Credits`}
                         </button>
@@ -846,7 +846,7 @@ function AddCreditsContent() {
                   </svg>
                   <span className="text-emerald-400 text-sm font-medium">Secure payment handling</span>
                 </div>
-                <p className="text-xs text-[#6b7280] mt-1 ml-7">Gateway verification and server-side crediting remain authoritative after checkout.</p>
+                <p className="text-xs text-zinc-500 mt-1 ml-7">Gateway verification and server-side crediting remain authoritative after checkout.</p>
               </div>
 
               {/* Pay Button */}
@@ -869,7 +869,7 @@ function AddCreditsContent() {
                     }
                   }}
                   disabled={loading || amount <= 0}
-                  className="w-full mt-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg shadow-purple-600/20"
+                  className="w-full mt-6 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg shadow-blue-600/20"
                 >
                   {loading ? "Processing..." : `Proceed to Pay $${amount.toFixed(2)}`}
                 </button>
@@ -885,8 +885,8 @@ function AddCreditsContent() {
 export default function AddCreditsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
-        <div className="text-[#9ca3af]">Loading...</div>
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+        <div className="text-zinc-400">Loading...</div>
       </div>
     }>
       <AddCreditsContent />

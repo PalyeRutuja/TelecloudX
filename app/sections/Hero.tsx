@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Play } from "lucide-react";
 import data from "../data/landing.json";
-import ParticleSphere from "../components/ParticleSphere";
+import { ParticleSphere } from "../components/ParticleSphere";
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);

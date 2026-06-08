@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Play } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import data from "../data/landing.json";
 import { ParticleSphere } from "../components/ParticleSphere";
@@ -121,13 +121,6 @@ export default function Hero() {
             >
               {data.hero.primaryCta}
               <ArrowUpRight className="h-4 w-4" />
-            </a>
-            <a
-              href="#services"
-              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-medium text-white transition-all hover:border-purple-500/40 hover:bg-white/10"
-            >
-              <Play className="h-4 w-4 fill-white text-white" />
-              {data.hero.secondaryCta}
             </a>
           </div>
         </div>

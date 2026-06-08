@@ -37,13 +37,6 @@ export default function CTA() {
                 {data.cta.primary}
                 <ArrowRight className="h-4 w-4" />
               </a>
-              <a
-                href="#services"
-                className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-medium text-white transition-all hover:border-purple-500/40"
-              >
-                {data.cta.secondary}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </a>
             </div>
             <p className="mt-8 max-w-md text-sm text-gray-500 leading-relaxed">
               {data.cta.body}
