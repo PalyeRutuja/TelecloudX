@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Shield, Zap } from "lucide-react";
+import { Shield, Zap, Server } from "lucide-react";
 import data from "../data/landing.json";
 
 export default function Intro() {
@@ -16,7 +16,7 @@ export default function Intro() {
       </div>
       <div className="mt-16 grid gap-6 md:grid-cols-3">
         {[
-          { icon: Globe, title: "Global Reach", desc: "Deploy across 50+ regions with intelligent geo-routing and edge optimization." },
+          { icon: Server, title: "VM Management", desc: "Provision, monitor, and manage cloud VMs with an intuitive dashboard and real-time metrics." },
           { icon: Shield, title: "Enterprise Security", desc: "End-to-end encryption, SOC 2, HIPAA, and GDPR compliance out of the box." },
           { icon: Zap, title: "Instant Scale", desc: "From zero to millions of concurrent calls with zero configuration." },
         ].map((item) => (

@@ -45,9 +45,9 @@
     },
     {
       "id": "04",
-      "title": "AI Voice",
-      "subtitle": "Conversational AI",
-      "desc": "End-to-end conversational AI — from intent design to production agents that route, qualify, and close. Human-like voice automation at scale."
+      "title": "Telegram Bot Control",
+      "subtitle": "Manage VMs via Telegram",
+      "desc": "Manage your cloud VMs directly from Telegram. Deploy, monitor, and pay without leaving the chat."
     },
     {
       "id": "05",

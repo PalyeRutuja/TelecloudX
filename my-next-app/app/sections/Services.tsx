@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Phone, Cloud, MessageSquare, Cpu, BarChart3, Shield, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Phone, Cloud, MessageSquare, Send, BarChart3, Shield, ChevronRight, ArrowUpRight } from "lucide-react";
 import data from "../data/landing.json";
 
-const serviceIcons = [Phone, Cloud, MessageSquare, Cpu, BarChart3, Shield] as const;
+const serviceIcons = [Phone, Cloud, MessageSquare, Send, BarChart3, Shield] as const;
 
-const vmsContent = {
-  items: ["Instant Number Provisioning", "Global SIP Trunking", "IVR & Call Routing", "Voicemail & Recording"],
-  tools: ["SIP", "WebRTC", "Asterisk", "AWS"]
+const cardContent: Record<number, { items: string[]; tools: string[] }> = {
+  0: { items: ["Instant Number Provisioning", "Global SIP Trunking", "IVR & Call Routing", "Voicemail & Recording"], tools: ["SIP", "WebRTC", "Asterisk", "AWS"] },
+  1: { items: ["Auto-Attendants", "Call Queuing", "Extension Dialing", "Conference Bridges"], tools: ["FreePBX", "Twilio", "VoIP", "TLS"] },
+  2: { items: ["Voice API", "SMS API", "WhatsApp API", "Webhook Events"], tools: ["REST", "GraphQL", "WebSocket", "SDK"] },
+  3: { items: ["/deploy", "/status", "/list", "/stop", "/pay"], tools: ["Telegram API", "Webhook", "Bot Commands"] },
+  4: { items: ["Device Provisioning", "SIM Management", "Low-Latency Routing", "Secure Tunnels"], tools: ["MQTT", "LTE-M", "eSIM", "TLS"] },
+  5: { items: ["Real-time Dashboards", "Call Quality Scoring", "Sentiment Analysis", "Custom Reports"], tools: ["ClickHouse", "Grafana", "Python", "AI/ML"] },
 };
+
+function getCardContent(index: number) {
+  return cardContent[index] ?? cardContent[0];
+}
 
 export default function Services() {
   const [activeIdx, setActiveIdx] = useState(0);
@@ -52,6 +60,7 @@ export default function Services() {
           {data.services.map((s, i) => {
             const SIcon = serviceIcons[i];
             const isActive = i === activeIdx;
+            const content = getCardContent(i);
             return (
               <article
                 key={s.id}
@@ -83,12 +92,12 @@ export default function Services() {
                   <p className="mt-3 text-sm text-gray-400 leading-relaxed">{s.desc}</p>
                 </div>
 
-                {/* Same items for all services */}
+                {/* Card-specific items and tools */}
                 <div className={`mt-5 grid grid-cols-2 gap-3 border-t pt-4 text-xs ${isActive ? "border-white/20" : "border-white/10"}`}>
                   <div>
                     <div className={`mb-2 uppercase tracking-wider text-[10px] ${isActive ? "text-purple-400/60" : "text-gray-600"}`}>Services</div>
                     <ul className="space-y-1.5">
-                      {vmsContent.items.map((it) => (
+                      {content.items.map((it) => (
                         <li key={it} className="flex items-center gap-1.5">
                           <ChevronRight className={`h-3 w-3 ${isActive ? "text-purple-400/60" : "text-gray-600"}`} />
                           <span className={isActive ? "text-gray-300" : "text-gray-500"}>{it}</span>
@@ -99,7 +108,7 @@ export default function Services() {
                   <div>
                     <div className={`mb-2 uppercase tracking-wider text-[10px] ${isActive ? "text-purple-400/60" : "text-gray-600"}`}>Tools</div>
                     <ul className="space-y-1.5">
-                      {vmsContent.tools.map((t) => (
+                      {content.tools.map((t) => (
                         <li key={t} className="flex items-center gap-1.5">
                           <ChevronRight className={`h-3 w-3 ${isActive ? "text-purple-400/60" : "text-gray-600"}`} />
                           <span className={isActive ? "text-gray-300" : "text-gray-500"}>{t}</span>
