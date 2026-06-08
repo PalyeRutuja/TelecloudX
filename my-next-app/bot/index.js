@@ -14,6 +14,18 @@ const TelegramBot = require("node-telegram-bot-api");
 const { cleanupExpired } = require("./lib/session");
 const stateMachine = require("./state-machine");
 
+// Express server for Render
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("TeleCloudX Bot Running");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`[Bot] Health server running on port ${PORT}`);
+});
+
 // Validate required env vars
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
