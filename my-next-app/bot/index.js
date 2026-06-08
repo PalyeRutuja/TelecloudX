@@ -9,6 +9,7 @@
  */
 
 require("dotenv").config({ path: ".env.local" });
+const express = require("express");
 
 const TelegramBot = require("node-telegram-bot-api");
 const { cleanupExpired } = require("./lib/session");
