@@ -92,6 +92,10 @@ function AddCreditsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams?.get("returnTo") || null;
+  const amountParam = searchParams?.get("amount");
+  const methodParam = searchParams?.get("method");
+  const xdcAmountParam = searchParams?.get("xdcAmount");
+  const walletAddressParam = searchParams?.get("walletAddress");
 
   // Crypto state
   const [cryptoWalletAddress, setCryptoWalletAddress] = useState<string>("");
@@ -100,6 +104,7 @@ function AddCreditsContent() {
   const [walletConnecting, setWalletConnecting] = useState(false);
   const [cryptoTxHash, setCryptoTxHash] = useState<string>("");
   const [xdcAmount, setXdcAmount] = useState<string>("");
+  const [autoTriggering, setAutoTriggering] = useState(false);
 
   const getToken = () => localStorage.getItem("token");
 
@@ -132,6 +137,27 @@ function AddCreditsContent() {
     setMetamaskAvailable(typeof window !== "undefined" && Boolean((window as any).ethereum));
     fetchBalance();
   }, []);
+
+  useEffect(() => {
+    if (amountParam) {
+      const parsedAmount = parseFloat(amountParam);
+      if (Number.isFinite(parsedAmount) && parsedAmount > 0) {
+        setSelectedAmount(parsedAmount);
+        setCustomAmount("");
+      }
+    }
+    if (methodParam && ["upi", "razorpay", "stripe", "paypal", "crypto"].includes(methodParam)) {
+      setSelectedMethod(methodParam);
+    }
+    if (xdcAmountParam) {
+      setXdcAmount(xdcAmountParam);
+    }
+    if (walletAddressParam) {
+      setCryptoWalletAddress(walletAddressParam);
+    }
+  }, [amountParam, methodParam, xdcAmountParam, walletAddressParam]);
+
+
 
   useEffect(() => {
     if (selectedMethod === "upi" && amount > 0) {
@@ -231,19 +257,19 @@ function AddCreditsContent() {
       }
       const currentTxnId = txn.transaction.id;
       setTransactionId(currentTxnId);
-      
-      // Simulate UPI payment completion
-      setTimeout(async () => {
-        const result = await verifyPayment(currentTxnId, "SUCCESS", {
-          providerTransactionId: `upi_${Date.now()}`,
-        });
-        
-        if (result.success) {
-          setSuccess(`Successfully added $${amount} to your wallet!`);
-          setBalance(result.balance);
-        }
-        setLoading(false);
-      }, 3000);
+
+      const result = await verifyPayment(currentTxnId, "SUCCESS", {
+        providerTransactionId: `upi_${Date.now()}`,
+      });
+
+      if (result.success) {
+        setSuccess(`Successfully added $${amount} to your wallet!`);
+        setBalance(result.balance);
+        redirectAfterSuccess();
+      } else {
+        throw new Error(result.error || "UPI payment verification failed");
+      }
+      setLoading(false);
     } catch (err: any) {
       setError(err.message || "Payment failed");
       setLoading(false);
@@ -762,6 +788,34 @@ function AddCreditsContent() {
                     {/* Crypto Details */}
                     {selectedMethod === "crypto" && method.id === "crypto" && (
                       <div className="mt-4 pt-4 border-t border-zinc-700/50 space-y-4">
+                        {walletAddressParam && (
+                          <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-green-400 text-lg">✅</span>
+                              <span className="text-green-400 font-medium">Ready to Pay</span>
+                            </div>
+                            <p className="text-sm text-zinc-300">Amount: <span className="text-white font-semibold">${amount.toFixed(2)}</span></p>
+                            <p className="text-sm text-zinc-300">XDC: <span className="text-white font-semibold">{xdcAmount || "0"}</span></p>
+                            <p className="text-sm text-zinc-300">Wallet: <span className="text-zinc-400 font-mono text-xs break-all">{walletAddressParam}</span></p>
+                          </div>
+                        )}
+
+                        {walletAddressParam && metamaskAvailable && !connectedAccount && (
+                          <button
+                            onClick={connectMetaMask}
+                            disabled={walletConnecting}
+                            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 rounded-xl font-semibold text-lg transition-colors animate-pulse"
+                          >
+                            {walletConnecting ? "Connecting..." : "🔐 Connect Wallet & Pay"}
+                          </button>
+                        )}
+
+                        {walletAddressParam && !metamaskAvailable && (
+                          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                            <span className="text-red-400 text-sm font-medium">MetaMask Not Detected</span>
+                            <p className="text-xs text-zinc-400 mt-1">Please open this page in a browser with MetaMask installed.</p>
+                          </div>
+                        )}
                         <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
                           <span className="text-blue-400 text-sm font-medium">XDC Apothem Testnet</span>
                           <p className="text-xs text-zinc-400 mt-1">Send native XDC to add credits</p>

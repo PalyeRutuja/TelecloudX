@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const transaction = getTransaction(transactionId);
+    const transaction = await getTransaction(transactionId);
     if (!transaction) {
       return Response.json(
         { error: "Transaction not found" },

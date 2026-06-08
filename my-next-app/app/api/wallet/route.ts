@@ -6,8 +6,10 @@ export async function GET(request: Request) {
   if (auth instanceof Response) return auth;
 
   try {
-    const balance = getBalance(auth.userId);
-    const transactions = getUserTransactions(auth.userId);
+    const [balance, transactions] = await Promise.all([
+      getBalance(auth.userId),
+      getUserTransactions(auth.userId),
+    ]);
 
     return Response.json({
       success: true,

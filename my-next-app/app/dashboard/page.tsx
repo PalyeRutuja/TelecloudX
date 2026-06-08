@@ -43,10 +43,15 @@ export default function DashboardPage() {
             setBalance(walletData.balance);
           }
 
-          // Fetch VM count from Firebase
+          // Fetch VM count from CloudStack
           try {
-            const vms = await listUserVms(userData.user.userId, userData.user.email);
-            setVmCount(vms.length);
+            const vmResponse = await fetch("/api/cloudstack/vms/list", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const vmData = await vmResponse.json();
+            if (vmData.success) {
+              setVmCount(vmData.count || 0);
+            }
           } catch (err) {
             console.error("Failed to fetch VMs:", err);
           }

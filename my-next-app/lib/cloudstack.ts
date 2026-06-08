@@ -1,118 +1,137 @@
-// Mock CloudStack API functions
-// In production, replace these with actual API calls
+import crypto from "crypto";
 
-export const mockServiceOfferings = [
-  { id: "1", name: "Small Instance", cpunumber: 1, memory: 1024, displaytext: "1 CPU, 1GB RAM" },
-  { id: "2", name: "Medium Instance", cpunumber: 2, memory: 2048, displaytext: "2 CPU, 2GB RAM" },
-  { id: "3", name: "Large Instance", cpunumber: 4, memory: 4096, displaytext: "4 CPU, 4GB RAM" },
-];
+const API_URL = process.env.CLOUDSTACK_API_URL || "https://qa.cloudstack.cloud/client/api";
+const API_KEY = process.env.CLOUDSTACK_API_KEY || "";
+const SECRET_KEY = process.env.CLOUDSTACK_SECRET_KEY || "";
 
-export const mockTemplates = [
-  { id: "1", name: "Ubuntu 22.04 LTS", displaytext: "Ubuntu Server", ostypename: "Ubuntu" },
-  { id: "2", name: "CentOS 9 Stream", displaytext: "CentOS Stream", ostypename: "CentOS" },
-  { id: "3", name: "Debian 12", displaytext: "Debian Bookworm", ostypename: "Debian" },
-];
+/**
+ * CloudStack API Signature Algorithm
+ *
+ * 1. Sort all parameters alphabetically by key name
+ * 2. For the signature string, lowercase both keys and values
+ * 3. URL-encode values with spaces encoded as %20
+ * 4. HMAC-SHA1 with the secret key
+ * 5. Base64 encode the digest
+ */
+function sortCloudStackParams(params: Record<string, string>): string[] {
+  return Object.keys(params).sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
+}
 
-export const mockZones = [
-  { id: "1", name: "Zone-1", networktype: "Advanced" },
-  { id: "2", name: "Zone-2", networktype: "Basic" },
-];
+function encodeCloudStackValue(value: string): string {
+  return encodeURIComponent(value);
+}
+
+function buildCloudStackSignatureString(params: Record<string, string>): string {
+  return sortCloudStackParams(params)
+    .map((key) => {
+      const value = params[key];
+      return `${key.toLowerCase()}=${encodeCloudStackValue(value.toLowerCase())}`;
+    })
+    .join("&");
+}
+
+function generateSignature(params: Record<string, string>): string {
+  const signatureString = buildCloudStackSignatureString(params);
+  console.log("[CloudStack] Signature input:", signatureString);
+
+  const hmac = crypto.createHmac("sha1", SECRET_KEY);
+  hmac.update(signatureString);
+  return hmac.digest("base64");
+}
+
+function buildCloudStackRequestQuery(params: Record<string, string>): string {
+  return sortCloudStackParams(params)
+    .map((key) => `${key}=${encodeCloudStackValue(params[key])}`)
+    .join("&");
+}
+
+async function callCloudStack(command: string, params: Record<string, string> = {}): Promise<any> {
+  if (!API_KEY || !SECRET_KEY) {
+    throw new Error("CloudStack API credentials are not configured");
+  }
+
+  // Build request parameters (WITHOUT signature)
+  const requestParams: Record<string, string> = {
+    apiKey: API_KEY,
+    command,
+    response: "json",
+    ...params,
+  };
+
+  // Generate signature from the parameters
+  const signature = generateSignature(requestParams);
+
+  // Build query string for the actual request URL using the original values.
+  const queryString = buildCloudStackRequestQuery(requestParams);
+
+  // Append signature
+  const url = `${API_URL}?${queryString}&signature=${encodeURIComponent(signature)}`;
+
+  console.log(`[CloudStack] URL: ${url.substring(0, 200)}...`);
+
+  try {
+    console.log(`[CloudStack] Calling ${command}...`);
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[CloudStack] ${command} failed: ${response.status} - ${errorText}`);
+      throw new Error(`CloudStack ${command} failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`[CloudStack] ${command} success`);
+    return data;
+  } catch (error) {
+    console.error(`[CloudStack] ${command} error:`, error);
+    throw error;
+  }
+}
 
 export async function listVirtualMachines(): Promise<any> {
-  return {
-    listvirtualmachinesresponse: {
-      count: 3,
-      virtualmachine: [
-        {
-          id: "vm-1",
-          name: "web-server-01",
-          displayname: "Web Server 01",
-          state: "Running",
-          templatename: "Ubuntu 22.04 LTS",
-          serviceofferingname: "Medium Instance",
-          cpunumber: 2,
-          memory: 2048,
-          zonename: "Zone-1",
-          created: "2024-01-15T10:00:00Z",
-          ipaddress: "10.0.1.100"
-        },
-        {
-          id: "vm-2",
-          name: "db-server-01",
-          displayname: "Database Server",
-          state: "Stopped",
-          templatename: "CentOS 9 Stream",
-          serviceofferingname: "Large Instance",
-          cpunumber: 4,
-          memory: 4096,
-          zonename: "Zone-1",
-          created: "2024-01-10T08:30:00Z",
-          ipaddress: "10.0.1.101"
-        },
-        {
-          id: "vm-3",
-          name: "app-server-01",
-          displayname: "Application Server",
-          state: "Running",
-          templatename: "Debian 12",
-          serviceofferingname: "Small Instance",
-          cpunumber: 1,
-          memory: 1024,
-          zonename: "Zone-2",
-          created: "2024-01-20T14:15:00Z",
-          ipaddress: "10.0.2.50"
-        }
-      ]
-    }
-  };
+  return callCloudStack("listVirtualMachines", { listall: "true" });
 }
 
 export async function listServiceOfferings(): Promise<any> {
-  return {
-    listserviceofferingsresponse: {
-      serviceoffering: mockServiceOfferings
-    }
-  };
+  return callCloudStack("listServiceOfferings");
 }
 
 export async function listTemplates(): Promise<any> {
-  return {
-    listtemplatesresponse: {
-      template: mockTemplates
-    }
-  };
+  return callCloudStack("listTemplates", { templatefilter: "featured" });
 }
 
 export async function listZones(): Promise<any> {
-  return {
-    listzonesresponse: {
-      zone: mockZones
-    }
-  };
+  return callCloudStack("listZones");
 }
 
 export async function deployVirtualMachine(params?: Record<string, string>): Promise<any> {
-  return {
-    deployvirtualmachineresponse: {
-      id: `vm-${Date.now()}`,
-      jobid: `job-${Date.now()}`,
-      ...params
-    }
-  };
+  const deployParams = params || {};
+  return callCloudStack("deployVirtualMachine", deployParams);
 }
 
-export async function startVirtualMachine(): Promise<any> {
-  return { startvirtualmachineresponse: { jobid: `job-${Date.now()}` } };
+export async function startVirtualMachine(id?: string): Promise<any> {
+  if (!id) throw new Error("VM id is required");
+  return callCloudStack("startVirtualMachine", { id });
 }
 
-export async function stopVirtualMachine(): Promise<any> {
-  return { stopvirtualmachineresponse: { jobid: `job-${Date.now()}` } };
+export async function stopVirtualMachine(id?: string): Promise<any> {
+  if (!id) throw new Error("VM id is required");
+  return callCloudStack("stopVirtualMachine", { id });
 }
 
-export async function destroyVirtualMachine(): Promise<any> {
-  return { destroyvirtualmachineresponse: { jobid: `job-${Date.now()}` } };
+export async function destroyVirtualMachine(id?: string): Promise<any> {
+  if (!id) throw new Error("VM id is required");
+  return callCloudStack("destroyVirtualMachine", { id });
 }
 
 export async function listNetworks(zoneid: string): Promise<any> {
+  if (!zoneid) throw new Error("Zone id is required");
   return callCloudStack("listNetworks", { zoneid, listall: "true" });
 }

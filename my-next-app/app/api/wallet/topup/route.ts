@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/middleware";
-import { createTransaction, processSuccessfulPayment, processFailedPayment } from "@/lib/wallet";
+import { createTransaction } from "@/lib/wallet";
 
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Create pending transaction
-    const transaction = createTransaction({
+    const transaction = await createTransaction({
       userId: auth.userId,
       amount,
       currency,

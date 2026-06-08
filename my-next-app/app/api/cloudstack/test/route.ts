@@ -8,7 +8,7 @@ export async function GET() {
     
     return Response.json({
       success: true,
-      message: "Using mock CloudStack data",
+      message: "CloudStack connection successful",
       data: result,
     });
   } catch (error: any) {

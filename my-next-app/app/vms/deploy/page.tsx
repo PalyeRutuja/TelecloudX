@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createUserVm } from "@/lib/vm-store";
 
 interface ServiceOffering {
   id: string;
@@ -266,25 +265,10 @@ export default function DeployVMPage() {
           console.error("Failed to deduct balance:", err);
         }
 
-        if (user) {
-          const deployment = data.data ?? {};
-          const vm = await createUserVm(user.userId, user.email, {
-            name: formData.name || formData.displayname || "new-vm",
-            displayname: formData.displayname || formData.name || "new-vm",
-            state: "Running",
-            templatename: selectedTemplate?.name || formData.templateid,
-            serviceofferingname: selectedOffering?.name || formData.serviceofferingid,
-            cpunumber: selectedOffering?.cpunumber,
-            memory: selectedOffering?.memory,
-            zonename: selectedZone?.name || formData.zoneid,
-            cloudstackVmId: typeof deployment.id === "string" ? deployment.id : undefined,
-            cloudstackJobId: typeof deployment.jobid === "string" ? deployment.jobid : undefined,
-            cloudstackResponse: deployment,
-          });
-          setSuccess(`VM deployed successfully! $${VM_DEPLOYMENT_COST} deducted from your wallet. ID: ${vm.id || data.data?.id || "N/A"}`);
-        } else {
-          setSuccess(`VM deployed successfully! $${VM_DEPLOYMENT_COST} deducted from your wallet. ID: ${data.data?.id || "N/A"}`);
-        }
+        const persistedVm = data.vm ?? {};
+        setSuccess(
+          `VM deployed successfully! $${VM_DEPLOYMENT_COST} deducted from your wallet. ID: ${persistedVm.cloudstackVmId || data.data?.id || persistedVm.id || "N/A"}`
+        );
         setFormData({
           name: "",
           displayname: "",
@@ -431,8 +415,8 @@ export default function DeployVMPage() {
               required
             >
               <option value="">Select a service offering...</option>
-              {offerings.map((offering) => (
-                <option key={offering.id} value={offering.id}>
+              {offerings.map((offering, index) => (
+                <option key={`${offering.id}-${index}`} value={offering.id}>
                   {offering.name} ({offering.cpunumber} CPU,{" "}
                   {(offering.memory / 1024).toFixed(1)} GB RAM)
                 </option>
@@ -453,8 +437,8 @@ export default function DeployVMPage() {
               required
             >
               <option value="">Select a template...</option>
-              {templates.map((template) => (
-                <option key={template.id} value={template.id}>
+              {templates.map((template, index) => (
+                <option key={`${template.id}-${index}`} value={template.id}>
                   {template.name} ({template.ostypename})
                 </option>
               ))}
@@ -472,8 +456,8 @@ export default function DeployVMPage() {
               required
             >
               <option value="">Select a zone...</option>
-              {zones.map((zone) => (
-                <option key={zone.id} value={zone.id}>
+              {zones.map((zone, index) => (
+                <option key={`${zone.id}-${index}`} value={zone.id}>
                   {zone.name} ({zone.networktype})
                 </option>
               ))}

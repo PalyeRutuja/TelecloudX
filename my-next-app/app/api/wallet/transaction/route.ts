@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/middleware";
-import { deductCredits, createTransaction } from "@/lib/wallet";
+import { processDebit } from "@/lib/wallet";
 
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
@@ -18,25 +18,21 @@ export async function POST(request: Request) {
 
     if (type === "debit") {
       try {
-        const wallet = deductCredits(auth.userId, amount);
-        
-        // Create transaction record
-        createTransaction({
-          userId: auth.userId,
+        const { wallet, transaction } = await processDebit(
+          auth.userId,
           amount,
-          currency: "USD",
-          provider: "internal",
-          status: "SUCCESS",
-          metadata: { 
-            type: "debit", 
+          "internal",
+          {
+            type: "debit",
             description: description || "VM Deployment",
             timestamp: new Date().toISOString(),
-          },
-        });
+          }
+        );
 
         return Response.json({
           success: true,
           balance: wallet.balance,
+          transaction,
           message: `Deducted $${amount} from wallet`,
         });
       } catch (err: any) {
