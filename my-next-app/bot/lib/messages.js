@@ -225,6 +225,10 @@ const MESSAGES = {
     "/account — View account\n" +
     "/list — List your VMs\n" +
     "/balance — Check wallet balance\n\n" +
+    "*VM Management Commands:*\n" +
+    "/startvm — Start a stopped VM\n" +
+    "/stopvm — Stop a running VM\n" +
+    "/destroyvm — Destroy a VM permanently\n\n" +
     "*Other Commands:*\n" +
     "/start — Welcome / Auth menu\n" +
     "/cancel — Cancel current operation\n" +

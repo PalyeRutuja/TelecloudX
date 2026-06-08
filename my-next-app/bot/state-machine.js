@@ -113,6 +113,24 @@ module.exports = function registerStateMachine(bot) {
     await listVMs(bot, chatId, s);
   });
 
+  bot.onText(/^\/startvm$/, async (msg) => {
+    const chatId = msg.chat.id; const s = getSession(chatId);
+    if (!s?.token) { bot.sendMessage(chatId, MESSAGES.NOT_LOGGED_IN, AUTH_MENU_KEYBOARD); return; }
+    await startVMFlow(bot, chatId, s);
+  });
+
+  bot.onText(/^\/stopvm$/, async (msg) => {
+    const chatId = msg.chat.id; const s = getSession(chatId);
+    if (!s?.token) { bot.sendMessage(chatId, MESSAGES.NOT_LOGGED_IN, AUTH_MENU_KEYBOARD); return; }
+    await stopVMFlow(bot, chatId, s);
+  });
+
+  bot.onText(/^\/destroyvm$/, async (msg) => {
+    const chatId = msg.chat.id; const s = getSession(chatId);
+    if (!s?.token) { bot.sendMessage(chatId, MESSAGES.NOT_LOGGED_IN, AUTH_MENU_KEYBOARD); return; }
+    await destroyVMFlow(bot, chatId, s);
+  });
+
   bot.onText(/^\/balance$/, async (msg) => {
     const chatId = msg.chat.id; const s = getSession(chatId);
     if (!s?.token) { bot.sendMessage(chatId, MESSAGES.NOT_LOGGED_IN, AUTH_MENU_KEYBOARD); return; }
@@ -143,6 +161,7 @@ module.exports = function registerStateMachine(bot) {
         case "register": await handleRegisterFlow(bot, chatId, text, state); break;
         case "deploy": await handleDeployFlow(bot, chatId, text, state, session); break;
         case "topup": await handleTopupFlow(bot, chatId, text, state, session); break;
+        case "vm_action": await handleVMActionFlow(bot, chatId, text, state, session); break;
         default:
           clearState(chatId);
           bot.sendMessage(chatId, MESSAGES.INVALID_INPUT);
@@ -417,7 +436,7 @@ module.exports = function registerStateMachine(bot) {
       if (method === "upi") {
         const upiUrl = generateUPIUrl(amount);
         const scannerUrl = generateTopupPageLink(amount, "upi");
-        
+
         // Send payment links to user
         bot.sendMessage(chatId, MESSAGES.TOPUP_UPI_LINK(amount, upiUrl), { parse_mode: "Markdown", ...CANCEL_KEYBOARD });
         bot.sendMessage(chatId, `📷 *UPI Scanner*\n\nOpen the QR page here:\n[Open UPI Scanner](${scannerUrl})`, { parse_mode: "Markdown" });
@@ -428,11 +447,11 @@ module.exports = function registerStateMachine(bot) {
           try {
             const { data: simData } = await simulateUPIPayment(chatId, "user@upi", amount);
             const providerTransactionId = simData?.payment?.paymentId || `upi_${Date.now()}`;
-            
+
             const { data: verifyData, error: verifyError } = await verifyWalletTopup(
               chatId, transactionId, "SUCCESS", providerTransactionId, { method, initiatedVia: "telegram" }
             );
-            
+
             if (verifyError || !verifyData?.success) {
               bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED(verifyError || "Verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
             } else {
@@ -444,7 +463,7 @@ module.exports = function registerStateMachine(bot) {
             sendMenu(chatId, getSession(chatId));
           }
         }, 5000);
-        
+
         clearState(chatId);
         return;
       }
@@ -452,11 +471,11 @@ module.exports = function registerStateMachine(bot) {
       if (method === "razorpay") {
         const { data: orderData, error: orderError, status: orderStatus } = await createRazorpayOrder(chatId, amount, transactionId);
         if (orderError || !orderData?.success) { handleApiError(bot, chatId, orderError || "Failed to create order", orderStatus); clearState(chatId); sendMenu(chatId, session); return; }
-        
+
         state.data.orderId = orderData.order?.id;
         state.data.transactionId = transactionId;
         const razorpayPageUrl = generateTopupPageLink(amount, "razorpay");
-        
+
         // Send payment link to user
         bot.sendMessage(chatId, MESSAGES.TOPUP_RAZORPAY_LINK(amount, orderData.order?.id), { parse_mode: "Markdown", ...CANCEL_KEYBOARD });
         bot.sendMessage(chatId, MESSAGES.TOPUP_RAZORPAY_PAGE(amount, razorpayPageUrl), { parse_mode: "Markdown" });
@@ -466,11 +485,11 @@ module.exports = function registerStateMachine(bot) {
         setTimeout(async () => {
           try {
             const providerTransactionId = `razorpay_${orderData.order?.id || Date.now()}`;
-            
+
             const { data: verifyData, error: verifyError } = await verifyWalletTopup(
               chatId, transactionId, "SUCCESS", providerTransactionId, { method, initiatedVia: "telegram" }
             );
-            
+
             if (verifyError || !verifyData?.success) {
               bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED(verifyError || "Verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
             } else {
@@ -482,7 +501,7 @@ module.exports = function registerStateMachine(bot) {
             sendMenu(chatId, getSession(chatId));
           }
         }, 8000);
-        
+
         clearState(chatId);
         return;
       }
@@ -518,7 +537,7 @@ module.exports = function registerStateMachine(bot) {
       state.data.walletAddress = walletAddress;
       const cryptoPageUrl = generateTopupPageLink(state.data.amount, "crypto") + `&xdcAmount=${encodeURIComponent(String(state.data.xdcAmount || ""))}&walletAddress=${encodeURIComponent(walletAddress)}`;
       clearState(chatId);
-      
+
       // Note: Telegram URL buttons require HTTPS. For local development,
       // provide the link as text for the user to copy/paste
       bot.sendMessage(
@@ -563,5 +582,96 @@ module.exports = function registerStateMachine(bot) {
     const { data, error, status } = await apiRequest("GET", "/api/wallet", chatId);
     if (error) { handleApiError(bot, chatId, error, status); return; }
     bot.sendMessage(chatId, `💰 Balance: *$${(data.balance || 0).toFixed(2)}*`, { parse_mode: "Markdown" });
+  }
+
+  /* ── VM Action Flows (Start/Stop/Destroy) ── */
+  async function startVMFlow(bot, chatId, session) {
+    bot.sendMessage(chatId, MESSAGES.PROCESSING);
+    const { data, error, status } = await apiRequest("GET", "/api/cloudstack/vms/list", chatId);
+    if (error) { handleApiError(bot, chatId, error, status); return; }
+    const vms = data.vms || [];
+    const stoppedVms = vms.filter(vm => (vm.state || "").toLowerCase() !== "running");
+    if (stoppedVms.length === 0) { bot.sendMessage(chatId, "✅ All your VMs are already running."); return; }
+    setState(chatId, { flow: "vm_action", step: "select", data: { vms: stoppedVms, action: "start" } });
+    bot.sendMessage(chatId, formatVMSelection(stoppedVms, "start"), CANCEL_KEYBOARD);
+  }
+
+  async function stopVMFlow(bot, chatId, session) {
+    bot.sendMessage(chatId, MESSAGES.PROCESSING);
+    const { data, error, status } = await apiRequest("GET", "/api/cloudstack/vms/list", chatId);
+    if (error) { handleApiError(bot, chatId, error, status); return; }
+    const vms = data.vms || [];
+    const runningVms = vms.filter(vm => (vm.state || "").toLowerCase() === "running");
+    if (runningVms.length === 0) { bot.sendMessage(chatId, "ℹ️ No running VMs found."); return; }
+    setState(chatId, { flow: "vm_action", step: "select", data: { vms: runningVms, action: "stop" } });
+    bot.sendMessage(chatId, formatVMSelection(runningVms, "stop"), CANCEL_KEYBOARD);
+  }
+
+  async function destroyVMFlow(bot, chatId, session) {
+    bot.sendMessage(chatId, MESSAGES.PROCESSING);
+    const { data, error, status } = await apiRequest("GET", "/api/cloudstack/vms/list", chatId);
+    if (error) { handleApiError(bot, chatId, error, status); return; }
+    const vms = data.vms || [];
+    if (vms.length === 0) { bot.sendMessage(chatId, MESSAGES.VM_LIST_EMPTY); return; }
+    setState(chatId, { flow: "vm_action", step: "select", data: { vms, action: "destroy" } });
+    bot.sendMessage(chatId, formatVMSelection(vms, "destroy"), CANCEL_KEYBOARD);
+  }
+
+  function formatVMSelection(vms, action) {
+    const actionEmoji = action === "start" ? "▶️" : action === "stop" ? "⏹️" : "🗑️";
+    let msg = `${actionEmoji} Select a VM to ${action}:\n\n`;
+    vms.forEach((vm, i) => {
+      msg += `${i + 1}. ${vm.displayname || vm.name}\n   Status: ${vm.state || "Unknown"}\n   ID: \`${vm.id || "N/A"}\`\n\n`;
+    });
+    msg += "Reply with the number.";
+    return msg;
+  }
+
+  async function handleVMActionFlow(bot, chatId, text, state, session) {
+    if (state.step === "select") {
+      const idx = parseInt(text, 10) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= (state.data.vms || []).length) {
+        bot.sendMessage(chatId, "Invalid selection. Reply with a number.", CANCEL_KEYBOARD);
+        return;
+      }
+      const selectedVm = state.data.vms[idx];
+      const action = state.data.action;
+      state.data.selectedVm = selectedVm;
+      state.step = "confirm";
+      setState(chatId, state);
+      const actionEmoji = action === "start" ? "▶️" : action === "stop" ? "⏹️" : "🗑️";
+      const warning = action === "destroy" ? "\n\n⚠️ This action cannot be undone!" : "";
+      bot.sendMessage(chatId,
+        `${actionEmoji} Confirm ${action} VM:\n\n` +
+        `Name: *${selectedVm.displayname || selectedVm.name}*\n` +
+        `Status: ${selectedVm.state || "Unknown"}${warning}\n\n` +
+        `Type "yes" to confirm or /cancel to abort.`,
+        { parse_mode: "Markdown", ...CANCEL_KEYBOARD }
+      );
+      return;
+    }
+    if (state.step === "confirm") {
+      const lower = text.toLowerCase();
+      if (lower !== "yes" && lower !== "y") {
+        clearState(chatId);
+        bot.sendMessage(chatId, "Action cancelled.", REMOVE_KEYBOARD);
+        sendMenu(chatId, session);
+        return;
+      }
+      const { selectedVm, action } = state.data;
+      bot.sendMessage(chatId, MESSAGES.PROCESSING);
+      let endpoint, successMsg;
+      if (action === "start") { endpoint = "/api/cloudstack/vms/start"; successMsg = "✅ VM started successfully!"; }
+      else if (action === "stop") { endpoint = "/api/cloudstack/vms/stop"; successMsg = "✅ VM stopped successfully!"; }
+      else { endpoint = "/api/cloudstack/vms/destroy"; successMsg = "✅ VM destroyed successfully!"; }
+      const { error, status } = await apiRequest("POST", endpoint, chatId, {
+        id: selectedVm.cloudstackVmId || selectedVm.id,
+        firebaseId: selectedVm.id,
+      });
+      clearState(chatId);
+      if (error) { handleApiError(bot, chatId, error, status); sendMenu(chatId, session); return; }
+      bot.sendMessage(chatId, successMsg, { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+      sendMenu(chatId, session);
+    }
   }
 };
