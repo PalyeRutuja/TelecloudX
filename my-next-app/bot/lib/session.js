@@ -25,6 +25,9 @@ function normalizeBaseUrl(value) {
 }
 
 const NORMALIZED_BASE_URL = normalizeBaseUrl(process.env.BOT_WEB_BASE_URL);
+// Optional: Vercel Protection Bypass secret for automation
+// Set in Vercel Dashboard → Settings → Deployment Protection → Protection Bypass for Automation
+const VERCEL_BYPASS_SECRET = (process.env.VERCEL_BYPASS_SECRET || "").trim();
 /**
  * Map<telegramId, { token: string, email: string, name: string, userId: string }>
  * Stores auth tokens per Telegram user ID.
@@ -129,7 +132,12 @@ async function apiRequest(method, path, telegramId, data = null) {
     const config = {
       method,
       url: `${NORMALIZED_BASE_URL}${path}`,
-      ...authHeaders(telegramId),
+      headers: {
+        // Pass Vercel bypass secret so the bot can reach protected deployments
+        ...(VERCEL_BYPASS_SECRET ? { "x-vercel-protection-bypass": VERCEL_BYPASS_SECRET } : {}),
+        // Pass auth token if the user is logged in
+        ...authHeaders(telegramId).headers,
+      },
     };
     if (data) {
       config.data = data;
