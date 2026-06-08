@@ -73,25 +73,29 @@ export async function updateTransaction(
 }
 
 export async function getUserTransactions(userId: string): Promise<Transaction[]> {
+  // Sort in-memory instead of using .orderBy() to avoid requiring a Firestore composite index
   const snapshot = await transactionsCollection()
     .where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
     .get();
-  
-  return snapshot.docs.map((doc) => doc.data() as Transaction);
+
+  return snapshot.docs
+    .map((doc) => doc.data() as Transaction)
+    .sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1));
 }
 
 export async function getUserTransactionsByStatus(
   userId: string,
   status: Transaction["status"]
 ): Promise<Transaction[]> {
+  // Sort in-memory instead of using .orderBy() to avoid requiring a Firestore composite index
   const snapshot = await transactionsCollection()
     .where("userId", "==", userId)
     .where("status", "==", status)
-    .orderBy("createdAt", "desc")
     .get();
-  
-  return snapshot.docs.map((doc) => doc.data() as Transaction);
+
+  return snapshot.docs
+    .map((doc) => doc.data() as Transaction)
+    .sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1));
 }
 
 export async function getPendingTransactions(userId: string): Promise<Transaction[]> {
@@ -102,7 +106,8 @@ export async function getSuccessfulTransactions(userId: string): Promise<Transac
   return getUserTransactionsByStatus(userId, "SUCCESS");
 }
 
-// Atomic operation: Update transaction status and add credits in a single Firestore transaction
+// Atomic operation: Update transaction status and add credits in a single Firestore transaction.
+// IMPORTANT: ALL reads must happen before any writes inside runTransaction.
 export async function processSuccessfulPayment(
   transactionId: string,
   providerTransactionId?: string,
@@ -110,52 +115,60 @@ export async function processSuccessfulPayment(
 ): Promise<{ transaction: Transaction; wallet: { userId: string; balance: number; currency: string } }> {
   const txnRef = transactionRef(transactionId);
 
-  // Read the transaction first so we know which wallet to update.
-  const txnSnapshot = await txnRef.get();
-  if (!txnSnapshot.exists) {
-    throw new Error("Transaction not found");
-  }
-  
-  const transaction = txnSnapshot.data() as Transaction;
-  
-  if (transaction.status === "SUCCESS") {
-    // Already processed, just return current state
-    const walletSnapshot = await adminFirestore.collection("wallets").doc(transaction.userId).get();
-    const wallet = walletSnapshot.exists
-      ? (walletSnapshot.data() as { userId: string; balance: number; currency: string })
+  return adminFirestore.runTransaction(async (firestoreTxn) => {
+    // ── READS FIRST ──────────────────────────────────────────────────────────
+    const txnSnapshot = await firestoreTxn.get(txnRef);
+    if (!txnSnapshot.exists) {
+      throw new Error("Transaction not found");
+    }
+
+    const transaction = txnSnapshot.data() as Transaction;
+    const userWalletRef = adminFirestore.collection("wallets").doc(transaction.userId);
+    const walletSnapshot = await firestoreTxn.get(userWalletRef);
+
+    // ── PROCESS READS ────────────────────────────────────────────────────────
+    if (transaction.status === "SUCCESS") {
+      // Already processed – return current state without writes
+      const wallet = walletSnapshot.exists
+        ? (walletSnapshot.data() as { userId: string; balance: number; currency: string })
+        : { userId: transaction.userId, balance: 0, currency: "USD" };
+      return { transaction, wallet };
+    }
+
+    const now = nowIso();
+    const currentWallet = walletSnapshot.exists
+      ? (walletSnapshot.data() as {
+          userId: string;
+          balance: number;
+          currency: string;
+          createdAt?: string;
+          updatedAt?: string;
+        })
       : { userId: transaction.userId, balance: 0, currency: "USD" };
-    return { transaction, wallet };
-  }
 
-  const userWalletRef = adminFirestore.collection("wallets").doc(transaction.userId);
-  const walletSnapshot = await userWalletRef.get();
-  const currentWallet = walletSnapshot.exists
-    ? (walletSnapshot.data() as { userId: string; balance: number; currency: string; createdAt?: string; updatedAt?: string })
-    : { userId: transaction.userId, balance: 0, currency: "USD" };
+    const updatedTransaction: Transaction = {
+      ...transaction,
+      status: "SUCCESS",
+      providerTransactionId: providerTransactionId || transaction.providerTransactionId,
+      metadata: { ...transaction.metadata, ...metadata },
+      updatedAt: now,
+    };
 
-  const updatedTransaction: Transaction = {
-    ...transaction,
-    status: "SUCCESS",
-    providerTransactionId: providerTransactionId || transaction.providerTransactionId,
-    metadata: { ...transaction.metadata, ...metadata },
-    updatedAt: nowIso(),
-  };
+    const walletData = {
+      ...currentWallet,
+      userId: transaction.userId,
+      balance: (currentWallet.balance || 0) + transaction.amount,
+      currency: currentWallet.currency || "USD",
+      updatedAt: now,
+      createdAt: currentWallet.createdAt || now,
+    };
 
-  const walletData = {
-    ...currentWallet,
-    userId: transaction.userId,
-    balance: (currentWallet.balance || 0) + transaction.amount,
-    currency: currentWallet.currency || "USD",
-    updatedAt: nowIso(),
-    createdAt: currentWallet.createdAt || nowIso(),
-  };
+    // ── WRITES AFTER ALL READS ───────────────────────────────────────────────
+    firestoreTxn.set(txnRef, updatedTransaction);
+    firestoreTxn.set(userWalletRef, walletData);
 
-  const batch = adminFirestore.batch();
-  batch.set(txnRef, updatedTransaction);
-  batch.set(userWalletRef, walletData);
-  await batch.commit();
-
-  return { transaction: updatedTransaction, wallet: walletData };
+    return { transaction: updatedTransaction, wallet: walletData };
+  });
 }
 
 export async function processFailedPayment(
@@ -181,7 +194,8 @@ export async function processFailedPayment(
   return updated;
 }
 
-// Atomic debit: Create transaction and deduct balance in a single operation
+// Atomic debit: Deduct balance and record transaction inside a single Firestore transaction.
+// IMPORTANT: ALL reads must happen before any writes inside runTransaction.
 export async function processDebit(
   userId: string,
   amount: number,
@@ -191,46 +205,50 @@ export async function processDebit(
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error("Invalid debit amount");
   }
-  
-  const walletRef = adminFirestore.collection("wallets").doc(userId);
+
+  const walletDocRef = adminFirestore.collection("wallets").doc(userId);
   const transactionId = generateTransactionId();
   const txnRef = transactionRef(transactionId);
-  const now = nowIso();
-  
-  const walletSnapshot = await walletRef.get();
 
-  if (!walletSnapshot.exists) {
-    throw new Error("Insufficient balance");
-  }
+  return adminFirestore.runTransaction(async (firestoreTxn) => {
+    // ── READS FIRST ──────────────────────────────────────────────────────────
+    const walletSnapshot = await firestoreTxn.get(walletDocRef);
 
-  const currentWallet = walletSnapshot.data() as any;
+    if (!walletSnapshot.exists) {
+      throw new Error("Insufficient balance");
+    }
 
-  if ((currentWallet.balance || 0) < amount) {
-    throw new Error("Insufficient balance");
-  }
+    const currentWallet = walletSnapshot.data() as any;
 
-  const updatedWallet = {
-    ...currentWallet,
-    balance: currentWallet.balance - amount,
-    updatedAt: now,
-  };
+    if ((currentWallet.balance || 0) < amount) {
+      throw new Error("Insufficient balance");
+    }
 
-  const transaction: Transaction = {
-    id: transactionId,
-    userId,
-    amount,
-    currency: currentWallet.currency || "USD",
-    provider,
-    status: "SUCCESS",
-    metadata,
-    createdAt: now,
-    updatedAt: now,
-  };
+    // ── PROCESS READS ────────────────────────────────────────────────────────
+    const now = nowIso();
 
-  const batch = adminFirestore.batch();
-  batch.set(walletRef, updatedWallet);
-  batch.set(txnRef, transaction);
-  await batch.commit();
+    const updatedWallet = {
+      ...currentWallet,
+      balance: currentWallet.balance - amount,
+      updatedAt: now,
+    };
 
-  return { transaction, wallet: updatedWallet };
+    const transaction: Transaction = {
+      id: transactionId,
+      userId,
+      amount,
+      currency: currentWallet.currency || "USD",
+      provider,
+      status: "SUCCESS",
+      metadata,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // ── WRITES AFTER ALL READS ───────────────────────────────────────────────
+    firestoreTxn.set(walletDocRef, updatedWallet);
+    firestoreTxn.set(txnRef, transaction);
+
+    return { transaction, wallet: updatedWallet };
+  });
 }

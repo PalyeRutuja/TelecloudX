@@ -11,14 +11,17 @@
 const axios = require("axios");
 
 function normalizeBaseUrl(value) {
-  const raw = (value || "").trim();
+  // Strip surrounding whitespace, trailing slashes AND trailing dots
+  // A trailing dot (e.g. "example.com.") causes TLS handshake failures
+  // because the SSL certificate won't match the fully-qualified domain name.
+  const raw = (value || "").trim().replace(/[./]+$/, "");
   if (!raw) {
     return "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
   }
   if (/^https?:\/\//i.test(raw)) {
-    return raw.replace(/\/$/, "");
+    return raw;
   }
-  return `https://${raw.replace(/\/$/, "")}`;
+  return `https://${raw}`;
 }
 
 const NORMALIZED_BASE_URL = normalizeBaseUrl(process.env.BOT_WEB_BASE_URL);
