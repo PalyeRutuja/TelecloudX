@@ -159,6 +159,18 @@ function AddCreditsContent() {
 
 
 
+  // Auto-trigger MetaMask when wallet address and XDC amount are provided via URL params
+  useEffect(() => {
+    if (walletAddressParam && xdcAmountParam && methodParam === "crypto" && metamaskAvailable && !autoTriggering) {
+      setAutoTriggering(true);
+      // Wait for state to be set from URL params
+      const timer = setTimeout(() => {
+        handleCryptoPayment();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [walletAddressParam, xdcAmountParam, methodParam, metamaskAvailable, autoTriggering]);
+
   useEffect(() => {
     if (selectedMethod === "upi" && amount > 0) {
       generateUPIQR();

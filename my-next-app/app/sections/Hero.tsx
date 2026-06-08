@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Play } from "lucide-react";
+import { FaTelegram } from "react-icons/fa";
 import Link from "next/link";
 import data from "../data/landing.json";
 import { ParticleSphere } from "../components/ParticleSphere";
@@ -31,6 +32,16 @@ export default function Hero() {
         </div>
         
         <div className="flex items-center gap-4">
+          <a
+            href="https://t.me/TeleCloudX_Bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 bg-gradient-to-r from-sky-500 to-blue-600"
+            title="Connect with Telegram Bot"
+          >
+            <FaTelegram className="h-4 w-4" />
+            Telegram
+          </a>
           <Link
             href="/login"
             className="text-sm text-gray-300 hover:text-white transition-colors"
