@@ -374,39 +374,73 @@ module.exports = function registerStateMachine(bot) {
       if (method === "upi") {
         const upiUrl = generateUPIUrl(amount);
         const scannerUrl = generateTopupPageLink(amount, "upi");
+        
+        // Send payment links to user
         bot.sendMessage(chatId, MESSAGES.TOPUP_UPI_LINK(amount, upiUrl), { parse_mode: "Markdown", ...CANCEL_KEYBOARD });
         bot.sendMessage(chatId, `📷 *UPI Scanner*\n\nOpen the QR page here:\n[Open UPI Scanner](${scannerUrl})`, { parse_mode: "Markdown" });
+        bot.sendMessage(chatId, "⏳ Processing your payment... Please wait.", { parse_mode: "Markdown" });
 
-        const { data: simData, error: simError, status: simStatus } = await simulateUPIPayment(chatId, "user@upi", amount);
-        if (simError || !simData?.success) {
-          clearState(chatId);
-          handleApiError(bot, chatId, simError || "Failed to simulate UPI payment", simStatus);
-          sendMenu(chatId, session);
-          return;
-        }
-
-        const providerTransactionId = simData.payment?.paymentId || `upi_${Date.now()}`;
-        const { data: verifyData, error: verifyError } = await verifyWalletTopup(
-          chatId, transactionId, "SUCCESS", providerTransactionId, { method, initiatedVia: "telegram" }
-        );
+        // Auto-verify after 5 seconds (simulating payment completion)
+        setTimeout(async () => {
+          try {
+            const { data: simData } = await simulateUPIPayment(chatId, "user@upi", amount);
+            const providerTransactionId = simData?.payment?.paymentId || `upi_${Date.now()}`;
+            
+            const { data: verifyData, error: verifyError } = await verifyWalletTopup(
+              chatId, transactionId, "SUCCESS", providerTransactionId, { method, initiatedVia: "telegram" }
+            );
+            
+            if (verifyError || !verifyData?.success) {
+              bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED(verifyError || "Verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+            } else {
+              bot.sendMessage(chatId, MESSAGES.TOPUP_SUCCESS(amount, verifyData.balance || amount), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+            }
+            sendMenu(chatId, getSession(chatId));
+          } catch (err) {
+            bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED("Payment verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+            sendMenu(chatId, getSession(chatId));
+          }
+        }, 5000);
+        
         clearState(chatId);
-        if (verifyError || !verifyData?.success) {
-          bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED(verifyError || "Verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
-          sendMenu(chatId, session);
-          return;
-        }
-        bot.sendMessage(chatId, MESSAGES.TOPUP_SUCCESS(amount, verifyData.balance || amount), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
-        sendMenu(chatId, session);
         return;
       }
 
       if (method === "razorpay") {
         const { data: orderData, error: orderError, status: orderStatus } = await createRazorpayOrder(chatId, amount, transactionId);
         if (orderError || !orderData?.success) { handleApiError(bot, chatId, orderError || "Failed to create order", orderStatus); clearState(chatId); sendMenu(chatId, session); return; }
-        state.data.orderId = orderData.order?.id; state.step = "confirm_payment"; setState(chatId, state);
+        
+        state.data.orderId = orderData.order?.id;
+        state.data.transactionId = transactionId;
         const razorpayPageUrl = generateTopupPageLink(amount, "razorpay");
+        
+        // Send payment link to user
         bot.sendMessage(chatId, MESSAGES.TOPUP_RAZORPAY_LINK(amount, orderData.order?.id), { parse_mode: "Markdown", ...CANCEL_KEYBOARD });
         bot.sendMessage(chatId, MESSAGES.TOPUP_RAZORPAY_PAGE(amount, razorpayPageUrl), { parse_mode: "Markdown" });
+        bot.sendMessage(chatId, "⏳ Processing your payment... Please wait.", { parse_mode: "Markdown" });
+
+        // Auto-verify after 8 seconds (simulating Razorpay payment completion)
+        setTimeout(async () => {
+          try {
+            const providerTransactionId = `razorpay_${orderData.order?.id || Date.now()}`;
+            
+            const { data: verifyData, error: verifyError } = await verifyWalletTopup(
+              chatId, transactionId, "SUCCESS", providerTransactionId, { method, initiatedVia: "telegram" }
+            );
+            
+            if (verifyError || !verifyData?.success) {
+              bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED(verifyError || "Verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+            } else {
+              bot.sendMessage(chatId, MESSAGES.TOPUP_SUCCESS(amount, verifyData.balance || amount), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+            }
+            sendMenu(chatId, getSession(chatId));
+          } catch (err) {
+            bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED("Payment verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+            sendMenu(chatId, getSession(chatId));
+          }
+        }, 8000);
+        
+        clearState(chatId);
         return;
       }
 
@@ -459,34 +493,10 @@ module.exports = function registerStateMachine(bot) {
       return;
     }
 
-    /* Step 3: Confirm payment */
+    /* Step 3: Confirm payment - Auto-verified, no longer needed */
     if (state.step === "confirm_payment") {
-      const lower = text.toLowerCase();
-      if (lower === "cancel") { clearState(chatId); bot.sendMessage(chatId, MESSAGES.TOPUP_CANCELLED, REMOVE_KEYBOARD); sendMenu(chatId, session); return; }
-      if (lower !== "done" && lower !== "yes" && lower !== "paid") {
-        bot.sendMessage(chatId, MESSAGES.TOPUP_CONFIRM_PROMPT, { parse_mode: "Markdown", ...CANCEL_KEYBOARD }); return;
-      }
-      bot.sendMessage(chatId, MESSAGES.TOPUP_VERIFYING);
-
-      const { amount, transactionId, method, orderId } = state.data;
-      let providerTransactionId = `${method}_${Date.now()}`;
-
-      if (method === "upi") {
-        const { data: simData } = await simulateUPIPayment(chatId, "user@upi", amount);
-        if (simData?.success) providerTransactionId = simData.payment?.paymentId || providerTransactionId;
-      }
-      if (method === "razorpay" && orderId) providerTransactionId = `razorpay_${orderId}`;
-
-      // Verify wallet topup (mirrors web verifyPayment)
-      const { data: verifyData, error: verifyError } = await verifyWalletTopup(
-        chatId, transactionId, "SUCCESS", providerTransactionId, { method, initiatedVia: "telegram" }
-      );
+      bot.sendMessage(chatId, "✅ Your payment is being processed automatically. You will receive a confirmation shortly.");
       clearState(chatId);
-      if (verifyError || !verifyData?.success) {
-        bot.sendMessage(chatId, MESSAGES.TOPUP_FAILED(verifyError || "Verification failed"), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
-        sendMenu(chatId, session); return;
-      }
-      bot.sendMessage(chatId, MESSAGES.TOPUP_SUCCESS(amount, verifyData.balance || amount), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
       sendMenu(chatId, session);
     }
   }

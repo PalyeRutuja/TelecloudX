@@ -1,15 +1,54 @@
 import crypto from "crypto";
-import { adminFirestore } from "@/lib/firebase-admin";
+import fs from "fs";
+import path from "path";
 
-interface WalletRecord {
-  userId: string;
-  balance: number;
-  currency: string;
-  createdAt: string;
-  updatedAt: string;
+const DATA_DIR = path.join(process.cwd(), ".data");
+const WALLETS_FILE = path.join(DATA_DIR, "wallets.json");
+const TRANSACTIONS_FILE = path.join(DATA_DIR, "transactions.json");
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
 }
 
-export interface Wallet {
+function readWallets(): Map<string, Wallet> {
+  ensureDataDir();
+  if (!fs.existsSync(WALLETS_FILE)) {
+    return new Map();
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(WALLETS_FILE, "utf-8"));
+    return new Map(data.map((w: Wallet) => [w.userId, w]));
+  } catch {
+    return new Map();
+  }
+}
+
+function writeWallets(wallets: Map<string, Wallet>) {
+  ensureDataDir();
+  fs.writeFileSync(WALLETS_FILE, JSON.stringify(Array.from(wallets.values()), null, 2));
+}
+
+function readTransactions(): Map<string, Transaction> {
+  ensureDataDir();
+  if (!fs.existsSync(TRANSACTIONS_FILE)) {
+    return new Map();
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(TRANSACTIONS_FILE, "utf-8"));
+    return new Map(data.map((t: Transaction) => [t.id, t]));
+  } catch {
+    return new Map();
+  }
+}
+
+function writeTransactions(transactions: Map<string, Transaction>) {
+  ensureDataDir();
+  fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify(Array.from(transactions.values()), null, 2));
+}
+
+interface Wallet {
   userId: string;
   balance: number;
   currency: string;
@@ -31,74 +70,66 @@ export interface Transaction {
   updatedAt: string;
 }
 
-const walletsCollection = () => adminFirestore.collection("wallets");
-const transactionsCollection = () => adminFirestore.collection("walletTransactions");
+let walletsCache: Map<string, Wallet> | null = null;
+let transactionsCache: Map<string, Transaction> | null = null;
 
-function walletRef(userId: string) {
-  return walletsCollection().doc(userId);
+function getWallets(): Map<string, Wallet> {
+  if (!walletsCache) {
+    walletsCache = readWallets();
+  }
+  return walletsCache;
 }
 
-function transactionRef(transactionId: string) {
-  return transactionsCollection().doc(transactionId);
+function getTransactions(): Map<string, Transaction> {
+  if (!transactionsCache) {
+    transactionsCache = readTransactions();
+  }
+  return transactionsCache;
+}
+
+function saveWallets() {
+  if (walletsCache) {
+    writeWallets(walletsCache);
+  }
+}
+
+function saveTransactions() {
+  if (transactionsCache) {
+    writeTransactions(transactionsCache);
+  }
 }
 
 function nowIso() {
   return new Date().toISOString();
 }
 
-function buildWallet(userId: string, data: Partial<WalletRecord> | undefined): Wallet {
+function buildWallet(userId: string, data?: Partial<Wallet>): Wallet {
   const now = nowIso();
   return {
     userId,
-    balance: Number(data?.balance ?? 0),
-    currency: String(data?.currency ?? "USD"),
-    createdAt: String(data?.createdAt ?? now),
-    updatedAt: String(data?.updatedAt ?? now),
+    balance: 0,
+    currency: "USD",
+    createdAt: now,
+    updatedAt: now,
+    ...data,
   };
 }
 
-function buildTransaction(id: string, data: Partial<Transaction> & { userId: string; amount: number; currency: string; provider: string; status: Transaction["status"]; createdAt?: string; updatedAt?: string; }): Transaction {
-  const createdAt = data.createdAt ?? nowIso();
+function buildTransaction(id: string, data: Omit<Transaction, "id">): Transaction {
   return {
     id,
-    userId: data.userId,
-    amount: Number(data.amount),
-    currency: data.currency,
-    provider: data.provider,
-    status: data.status,
-    transactionHash: data.transactionHash,
-    providerTransactionId: data.providerTransactionId,
-    metadata: data.metadata,
-    createdAt,
-    updatedAt: data.updatedAt ?? createdAt,
+    ...data,
   };
-}
-
-function stripUndefined<T>(value: T): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>).filter(([, v]) => v !== undefined)
-  ) as Partial<T>;
-}
-
-async function readWallet(userId: string): Promise<Wallet> {
-  const ref = walletRef(userId);
-  const snapshot = await ref.get();
-
-  if (!snapshot.exists) {
-    const wallet = buildWallet(userId, undefined);
-    await ref.set(wallet);
-    return wallet;
-  }
-
-  return buildWallet(userId, snapshot.data() as Partial<WalletRecord> | undefined);
-}
-
-async function writeWallet(userId: string, wallet: Wallet): Promise<void> {
-  await walletRef(userId).set(wallet, { merge: true });
 }
 
 export async function getWallet(userId: string): Promise<Wallet> {
-  return readWallet(userId);
+  const wallets = getWallets();
+  if (!wallets.has(userId)) {
+    const wallet = buildWallet(userId);
+    wallets.set(userId, wallet);
+    saveWallets();
+  }
+  return wallets.get(userId)!;
 }
 
 export async function getBalance(userId: string): Promise<number> {
@@ -111,21 +142,17 @@ export async function addCredits(userId: string, amount: number): Promise<Wallet
     throw new Error("Invalid credit amount");
   }
 
-  let nextWallet: Wallet | null = null;
+  const wallets = getWallets();
+  const current = await getWallet(userId);
+  const nextWallet: Wallet = {
+    ...current,
+    balance: current.balance + amount,
+    updatedAt: nowIso(),
+  };
+  wallets.set(userId, nextWallet);
+  saveWallets();
 
-  await adminFirestore.runTransaction(async (tx) => {
-    const ref = walletRef(userId);
-    const snapshot = await tx.get(ref);
-    const current = buildWallet(userId, snapshot.exists ? (snapshot.data() as Partial<WalletRecord>) : undefined);
-    nextWallet = {
-      ...current,
-      balance: current.balance + amount,
-      updatedAt: nowIso(),
-    };
-    tx.set(ref, nextWallet, { merge: true });
-  });
-
-  return nextWallet!;
+  return nextWallet;
 }
 
 export async function deductCredits(userId: string, amount: number): Promise<Wallet> {
@@ -133,38 +160,37 @@ export async function deductCredits(userId: string, amount: number): Promise<Wal
     throw new Error("Invalid debit amount");
   }
 
-  let nextWallet: Wallet | null = null;
+  const wallets = getWallets();
+  const current = await getWallet(userId);
 
-  await adminFirestore.runTransaction(async (tx) => {
-    const ref = walletRef(userId);
-    const snapshot = await tx.get(ref);
-    const current = buildWallet(userId, snapshot.exists ? (snapshot.data() as Partial<WalletRecord>) : undefined);
+  if (current.balance < amount) {
+    throw new Error("Insufficient balance");
+  }
 
-    if (current.balance < amount) {
-      throw new Error("Insufficient balance");
-    }
+  const nextWallet: Wallet = {
+    ...current,
+    balance: current.balance - amount,
+    updatedAt: nowIso(),
+  };
+  wallets.set(userId, nextWallet);
+  saveWallets();
 
-    nextWallet = {
-      ...current,
-      balance: current.balance - amount,
-      updatedAt: nowIso(),
-    };
-    tx.set(ref, nextWallet, { merge: true });
-  });
-
-  return nextWallet!;
+  return nextWallet;
 }
 
 export async function createTransaction(
   data: Omit<Transaction, "id" | "createdAt" | "updatedAt">
 ): Promise<Transaction> {
-  const ref = transactionRef(`txn_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`);
-  const transaction = buildTransaction(ref.id, {
+  const transactions = getTransactions();
+  const id = `txn_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+  const now = nowIso();
+  const transaction = buildTransaction(id, {
     ...data,
-    createdAt: nowIso(),
-    updatedAt: nowIso(),
+    createdAt: now,
+    updatedAt: now,
   });
-  await ref.set(stripUndefined(transaction));
+  transactions.set(id, transaction);
+  saveTransactions();
   return transaction;
 }
 
@@ -172,31 +198,27 @@ export async function updateTransaction(
   transactionId: string,
   updates: Partial<Transaction>
 ): Promise<Transaction | null> {
-  const ref = transactionRef(transactionId);
-  const snapshot = await ref.get();
-  if (!snapshot.exists) return null;
+  const transactions = getTransactions();
+  const transaction = transactions.get(transactionId);
+  if (!transaction) return null;
 
-  const current = snapshot.data() as Transaction;
   const updated: Transaction = {
-    ...current,
+    ...transaction,
     ...updates,
-    id: transactionId,
     updatedAt: nowIso(),
   };
-  await ref.set(stripUndefined(updated), { merge: true });
+  transactions.set(transactionId, updated);
+  saveTransactions();
   return updated;
 }
 
 export async function getTransaction(transactionId: string): Promise<Transaction | null> {
-  const snapshot = await transactionRef(transactionId).get();
-  if (!snapshot.exists) return null;
-  return snapshot.data() as Transaction;
+  return getTransactions().get(transactionId) || null;
 }
 
 export async function getUserTransactions(userId: string): Promise<Transaction[]> {
-  const snapshot = await transactionsCollection().where("userId", "==", userId).get();
-  return snapshot.docs
-    .map((document) => document.data() as Transaction)
+  return Array.from(getTransactions().values())
+    .filter((t) => t.userId === userId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
@@ -205,76 +227,49 @@ export async function processSuccessfulPayment(
   providerTransactionId?: string,
   metadata?: Record<string, any>
 ): Promise<{ transaction: Transaction; wallet: Wallet }> {
-  const ref = transactionRef(transactionId);
-  let updatedTransaction: Transaction | null = null;
-  let updatedWallet: Wallet | null = null;
-
-  await adminFirestore.runTransaction(async (tx) => {
-    const snapshot = await tx.get(ref);
-    if (!snapshot.exists) {
-      throw new Error("Transaction not found");
-    }
-
-    const currentTransaction = snapshot.data() as Transaction;
-    const walletSnapshot = await tx.get(walletRef(currentTransaction.userId));
-    const currentWallet = buildWallet(
-      currentTransaction.userId,
-      walletSnapshot.exists ? (walletSnapshot.data() as Partial<WalletRecord>) : undefined
-    );
-
-    if (currentTransaction.status === "SUCCESS") {
-      updatedTransaction = currentTransaction;
-      updatedWallet = currentWallet;
-      return;
-    }
-
-    const nextWallet: Wallet = {
-      ...currentWallet,
-      balance: currentWallet.balance + currentTransaction.amount,
-      updatedAt: nowIso(),
-    };
-
-    const nextTransaction: Transaction = {
-      ...currentTransaction,
-      status: "SUCCESS",
-      providerTransactionId,
-      metadata: { ...currentTransaction.metadata, ...metadata },
-      updatedAt: nowIso(),
-    };
-
-    tx.set(walletRef(currentTransaction.userId), nextWallet, { merge: true });
-    tx.set(ref, stripUndefined(nextTransaction), { merge: true });
-
-    updatedTransaction = nextTransaction;
-    updatedWallet = nextWallet;
-  });
-
-  if (!updatedTransaction || !updatedWallet) {
-    throw new Error("Failed to process payment");
+  const transaction = await getTransaction(transactionId);
+  if (!transaction) {
+    throw new Error("Transaction not found");
   }
 
-  return { transaction: updatedTransaction, wallet: updatedWallet };
+  if (transaction.status === "SUCCESS") {
+    const wallet = await getWallet(transaction.userId);
+    return { transaction, wallet };
+  }
+
+  const updated = await updateTransaction(transactionId, {
+    status: "SUCCESS",
+    providerTransactionId,
+    metadata: { ...transaction.metadata, ...metadata },
+  });
+
+  if (!updated) {
+    throw new Error("Failed to update transaction");
+  }
+
+  const wallet = await addCredits(transaction.userId, transaction.amount);
+
+  return { transaction: updated, wallet };
 }
 
 export async function processFailedPayment(
   transactionId: string,
   reason?: string
 ): Promise<Transaction> {
-  const ref = transactionRef(transactionId);
-  const snapshot = await ref.get();
-  if (!snapshot.exists) {
+  const transaction = await getTransaction(transactionId);
+  if (!transaction) {
     throw new Error("Transaction not found");
   }
 
-  const current = snapshot.data() as Transaction;
-  const updated: Transaction = {
-    ...current,
+  const updated = await updateTransaction(transactionId, {
     status: "FAILED",
-    metadata: { ...current.metadata, failureReason: reason },
-    updatedAt: nowIso(),
-  };
+    metadata: { ...transaction.metadata, failureReason: reason },
+  });
 
-  await ref.set(stripUndefined(updated), { merge: true });
+  if (!updated) {
+    throw new Error("Failed to update transaction");
+  }
+
   return updated;
 }
 
@@ -288,50 +283,15 @@ export async function processDebit(
     throw new Error("Invalid debit amount");
   }
 
-  let updatedTransaction: Transaction | null = null;
-  let updatedWallet: Wallet | null = null;
-
-  await adminFirestore.runTransaction(async (tx) => {
-    const walletSnapshot = await tx.get(walletRef(userId));
-    const currentWallet = buildWallet(
-      userId,
-      walletSnapshot.exists ? (walletSnapshot.data() as Partial<WalletRecord>) : undefined
-    );
-
-    if (currentWallet.balance < amount) {
-      throw new Error("Insufficient balance");
-    }
-
-    const now = nowIso();
-    const transactionId = `txn_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
-    const transactionDoc = transactionRef(transactionId);
-    const nextWallet: Wallet = {
-      ...currentWallet,
-      balance: currentWallet.balance - amount,
-      updatedAt: now,
-    };
-    const transaction: Transaction = {
-      id: transactionDoc.id,
-      userId,
-      amount,
-      currency: currentWallet.currency,
-      provider,
-      status: "SUCCESS",
-      metadata,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    tx.set(walletRef(userId), nextWallet, { merge: true });
-    tx.set(transactionDoc, stripUndefined(transaction));
-
-    updatedTransaction = transaction;
-    updatedWallet = nextWallet;
+  const wallet = await deductCredits(userId, amount);
+  const transaction = await createTransaction({
+    userId,
+    amount,
+    currency: wallet.currency,
+    provider,
+    status: "SUCCESS",
+    metadata,
   });
 
-  if (!updatedTransaction || !updatedWallet) {
-    throw new Error("Failed to process debit");
-  }
-
-  return { transaction: updatedTransaction, wallet: updatedWallet };
+  return { transaction, wallet };
 }

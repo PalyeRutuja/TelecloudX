@@ -3,8 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navItems = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: string;
+  wip?: boolean;
+  active?: boolean;
+}
+
+const navItems: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: "📊" },
+  { name: "Virtual Machines", href: "/vms", icon: "💻" },
   { name: "Deploy VM", href: "/vms/deploy", icon: "🚀" },
   { name: "Managed DB", href: "#", icon: "🗄️", wip: true },
   { name: "Storage", href: "#", icon: "💾", wip: true },
@@ -14,7 +23,7 @@ const navItems = [
   { name: "Subscriptions", href: "#", icon: "📋" },
   { name: "Wallet", href: "/dashboard/wallet", icon: "💰" },
   { name: "KYC Verification", href: "#", icon: "🆔" },
-  { name: "Billing", href: "/dashboard/billing/topup", icon: "💳", active: true },
+  { name: "Billing", href: "/dashboard/billing/topup", icon: "💳" },
   { name: "Referrals", href: "#", icon: "👥" },
   { name: "Analytics", href: "#", icon: "📈" },
   { name: "Support", href: "#", icon: "🎧" },

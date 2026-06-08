@@ -623,7 +623,7 @@ function AddCreditsContent() {
                     }}
                     className={`py-3 px-4 rounded-xl border-2 font-semibold text-lg transition-all ${
                       selectedAmount === preset && !customAmount
-                        ? "border-blue-500 bg-blue-500/10 text-blue-400"
+                        ? "border-purple-500 bg-purple-500/10 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)]"
                         : "border-zinc-700 hover:border-zinc-600 text-zinc-300"
                     }`}
                   >
@@ -645,7 +645,7 @@ function AddCreditsContent() {
                     }}
                     placeholder="Enter amount"
                     min="5"
-                    className="w-full pl-8 pr-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full pl-8 pr-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
                   />
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">Minimum $5</p>
@@ -659,7 +659,7 @@ function AddCreditsContent() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-zinc-400">Total Credits</span>
-                  <span className="text-blue-400 font-semibold">${amount.toFixed(2)}</span>
+                  <span className="text-purple-400 font-semibold">${amount.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -672,7 +672,7 @@ function AddCreditsContent() {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Enter code"
-                    className="flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 text-sm"
+                    className="flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 text-sm"
                   />
                   <button className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg text-sm font-medium transition-colors">
                     Apply
@@ -686,7 +686,7 @@ function AddCreditsContent() {
           <div className="space-y-6">
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-blue-400">💳</span>
+                <span className="text-purple-400">💳</span>
                 <h2 className="text-lg font-semibold">Payment Method</h2>
               </div>
               <p className="text-sm text-zinc-400 mb-4">Every option shown here is now wired to a real backend flow</p>
@@ -697,13 +697,13 @@ function AddCreditsContent() {
                     key={method.id}
                     className={`relative border rounded-xl p-4 cursor-pointer transition-all ${
                       selectedMethod === method.id
-                        ? "border-blue-500 bg-blue-500/5"
+                        ? "border-purple-500 bg-purple-500/5 shadow-[0_0_15px_rgba(168,85,247,0.05)]"
                         : "border-zinc-700 hover:border-zinc-600"
                     }`}
                     onClick={() => setSelectedMethod(method.id)}
                   >
                     {method.featured && (
-                      <span className="absolute -top-2 left-4 px-2 py-0.5 bg-blue-500 text-white text-xs font-medium rounded-full">
+                      <span className="absolute -top-2 left-4 px-2 py-0.5 bg-purple-600 text-white text-xs font-medium rounded-full">
                         Featured
                       </span>
                     )}
@@ -721,10 +721,10 @@ function AddCreditsContent() {
                         <p className="text-sm text-zinc-400">{method.description}</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedMethod === method.id ? "border-blue-500" : "border-zinc-600"
+                        selectedMethod === method.id ? "border-purple-500" : "border-zinc-600"
                       }`}>
                         {selectedMethod === method.id && (
-                          <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
+                          <div className="w-2.5 h-2.5 bg-purple-500 rounded-full" />
                         )}
                       </div>
                     </div>
@@ -740,7 +740,7 @@ function AddCreditsContent() {
                           <div className="space-y-2">
                             <button
                               onClick={() => window.location.href = getUPIIntentUrl()}
-                              className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium transition-colors"
+                              className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-medium transition-colors shadow-[0_0_15px_rgba(168,85,247,0.3)]"
                             >
                               Open UPI App
                             </button>
@@ -778,7 +778,7 @@ function AddCreditsContent() {
                         <button
                           onClick={handleUPIPayment}
                           disabled={loading || amount <= 0}
-                          className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 rounded-xl font-medium transition-colors"
+                          className="w-full mt-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 rounded-xl font-medium transition-colors shadow-[0_0_15px_rgba(168,85,247,0.3)]"
                         >
                           {loading ? "Processing..." : `Pay $${amount} via UPI`}
                         </button>
@@ -804,7 +804,7 @@ function AddCreditsContent() {
                           <button
                             onClick={connectMetaMask}
                             disabled={walletConnecting}
-                            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 rounded-xl font-semibold text-lg transition-colors animate-pulse"
+                            className="w-full py-4 bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-800 rounded-xl font-semibold text-lg transition-colors animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.3)]"
                           >
                             {walletConnecting ? "Connecting..." : "🔐 Connect Wallet & Pay"}
                           </button>
@@ -816,8 +816,8 @@ function AddCreditsContent() {
                             <p className="text-xs text-zinc-400 mt-1">Please open this page in a browser with MetaMask installed.</p>
                           </div>
                         )}
-                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
-                          <span className="text-blue-400 text-sm font-medium">XDC Apothem Testnet</span>
+                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-2">
+                          <span className="text-purple-400 text-sm font-medium">XDC Apothem Testnet</span>
                           <p className="text-xs text-zinc-400 mt-1">Send native XDC to add credits</p>
                         </div>
 
@@ -828,7 +828,7 @@ function AddCreditsContent() {
                             value={cryptoWalletAddress}
                             onChange={(e) => setCryptoWalletAddress(e.target.value)}
                             placeholder="0x..."
-                            className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors"
+                            className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
                           />
                           <p className="text-xs text-zinc-500">
                             This must match your connected MetaMask account on XDC Apothem Testnet.
@@ -864,12 +864,12 @@ function AddCreditsContent() {
                               placeholder="Enter XDC amount"
                               min="0.001"
                               step="0.001"
-                              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors"
+                              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">XDC</span>
                           </div>
-                          <p className="text-xs text-zinc-500">
-                            Credits to add: <span className="text-blue-400 font-semibold">${amount.toFixed(2)}</span>
+                          <p className="text-xs text-zinc-500 mt-1">
+                            Credits to add: <span className="text-purple-400 font-semibold">${amount.toFixed(2)}</span>
                           </p>
                         </div>
 
@@ -882,7 +882,7 @@ function AddCreditsContent() {
                         <button
                           onClick={handleCryptoPayment}
                           disabled={loading || amount <= 0 || !xdcAmount}
-                          className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 rounded-xl font-medium transition-colors"
+                          className="w-full py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-800 rounded-xl font-medium transition-colors shadow-[0_0_15px_rgba(168,85,247,0.3)]"
                         >
                           {loading ? "Processing XDC payment..." : `Pay ${xdcAmount || "0"} XDC to Add Credits`}
                         </button>
@@ -923,7 +923,7 @@ function AddCreditsContent() {
                     }
                   }}
                   disabled={loading || amount <= 0}
-                  className="w-full mt-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 rounded-xl font-semibold text-lg transition-colors"
+                  className="w-full mt-6 py-4 bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-800 rounded-xl font-semibold text-lg transition-colors shadow-[0_0_20px_rgba(168,85,247,0.35)]"
                 >
                   {loading ? "Processing..." : `Proceed to Pay $${amount.toFixed(2)}`}
                 </button>

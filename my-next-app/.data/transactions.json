@@ -341,5 +341,120 @@
     "id": "txn_1780838664044_96f92fa0",
     "createdAt": "2026-06-07T13:24:24.044Z",
     "updatedAt": "2026-06-07T13:24:24.044Z"
+  },
+  {
+    "id": "txn_1780917064484_907a7c5e",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "internal",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "debit",
+      "description": "VM Deployment: edukde",
+      "timestamp": "2026-06-08T11:11:04.482Z"
+    },
+    "createdAt": "2026-06-08T11:11:04.485Z",
+    "updatedAt": "2026-06-08T11:11:04.485Z"
+  },
+  {
+    "id": "txn_1780917169535_a98ac5a5",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "upi",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T11:12:49.534Z"
+    },
+    "createdAt": "2026-06-08T11:12:49.535Z",
+    "updatedAt": "2026-06-08T11:12:49.916Z",
+    "providerTransactionId": "upi_1780917169548"
+  },
+  {
+    "id": "txn_1780917178340_f6e3fe60",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "razorpay",
+    "status": "PENDING",
+    "metadata": {
+      "initiatedAt": "2026-06-08T11:12:58.340Z"
+    },
+    "createdAt": "2026-06-08T11:12:58.340Z",
+    "updatedAt": "2026-06-08T11:12:58.340Z"
+  },
+  {
+    "id": "txn_1780917271908_c7ad22a2",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "razorpay",
+    "status": "PENDING",
+    "metadata": {
+      "initiatedAt": "2026-06-08T11:14:31.908Z"
+    },
+    "createdAt": "2026-06-08T11:14:31.908Z",
+    "updatedAt": "2026-06-08T11:14:31.908Z"
+  },
+  {
+    "id": "txn_1780917582721_6b53b572",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "upi",
+    "status": "PENDING",
+    "metadata": {
+      "initiatedAt": "2026-06-08T11:19:42.720Z"
+    },
+    "createdAt": "2026-06-08T11:19:42.721Z",
+    "updatedAt": "2026-06-08T11:19:42.721Z"
+  },
+  {
+    "id": "txn_1780917736287_6b11b1fe",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "upi",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T11:22:16.285Z",
+      "method": "upi",
+      "initiatedVia": "telegram"
+    },
+    "createdAt": "2026-06-08T11:22:16.288Z",
+    "updatedAt": "2026-06-08T11:22:21.970Z",
+    "providerTransactionId": "upi_1780917741621"
+  },
+  {
+    "id": "txn_1780917761790_7d8bf6a3",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "razorpay",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T11:22:41.790Z",
+      "method": "razorpay",
+      "initiatedVia": "telegram"
+    },
+    "createdAt": "2026-06-08T11:22:41.791Z",
+    "updatedAt": "2026-06-08T11:22:52.693Z",
+    "providerTransactionId": "razorpay_order_Sz7RAVIefUiBRD"
+  },
+  {
+    "id": "txn_1780919117498_fee80efd",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "internal",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "debit",
+      "description": "VM Deployment: hi",
+      "timestamp": "2026-06-08T11:45:17.495Z"
+    },
+    "createdAt": "2026-06-08T11:45:17.498Z",
+    "updatedAt": "2026-06-08T11:45:17.498Z"
   }
 ]
