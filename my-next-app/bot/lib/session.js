@@ -10,7 +10,7 @@
 
 const axios = require("axios");
 
-const BASE_URL = "https://telecloud-x-hiv7-krwy1fpzs-rutujapalye12-9049s-projects.vercel.app";
+const BASE_URL = "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
 
 /**
  * Map<telegramId, { token: string, email: string, name: string, userId: string }>

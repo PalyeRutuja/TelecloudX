@@ -471,5 +471,20 @@
     },
     "createdAt": "2026-06-08T12:04:43.630Z",
     "updatedAt": "2026-06-08T12:04:43.630Z"
+  },
+  {
+    "id": "txn_1780923320092_71bb9173",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "internal",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "debit",
+      "description": "VM Deployment: my",
+      "timestamp": "2026-06-08T12:55:20.089Z"
+    },
+    "createdAt": "2026-06-08T12:55:20.093Z",
+    "updatedAt": "2026-06-08T12:55:20.093Z"
   }
 ]
