@@ -10,8 +10,12 @@
 
 const axios = require("axios");
 
-const BASE_URL = "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
-
+const BASE_URL =
+  process.env.BOT_WEB_BASE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.WEB_BASE_URL ||
+  "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
+const NORMALIZED_BASE_URL = BASE_URL.replace(/\/$/, "");
 /**
  * Map<telegramId, { token: string, email: string, name: string, userId: string }>
  * Stores auth tokens per Telegram user ID.
@@ -115,7 +119,7 @@ async function apiRequest(method, path, telegramId, data = null) {
   try {
     const config = {
       method,
-      url: `${BASE_URL}${path}`,
+      url: `${NORMALIZED_BASE_URL}${path}`,
       ...authHeaders(telegramId),
     };
     if (data) {
@@ -141,5 +145,5 @@ module.exports = {
   cleanupExpired,
   authHeaders,
   apiRequest,
-  BASE_URL,
+  BASE_URL: NORMALIZED_BASE_URL,
 };

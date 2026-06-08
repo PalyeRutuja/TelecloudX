@@ -25,6 +25,15 @@ const {
 const MAX_LOGIN_RETRIES = 3;
 const VM_DEPLOYMENT_COST = 10;
 
+function getAuthUser(data) {
+  const user = data?.user ?? data ?? {};
+  return {
+    id: user.userId ?? user.id ?? data?.userId ?? data?.uid ?? "",
+    email: user.email ?? data?.email ?? "",
+    name: user.name ?? data?.name ?? "",
+  };
+}
+
 module.exports = function registerStateMachine(bot) {
   function sendMenu(chatId, session) {
     if (session && session.token) {
@@ -214,9 +223,15 @@ module.exports = function registerStateMachine(bot) {
         bot.sendMessage(chatId, `${MESSAGES.LOGIN_FAILED}\n\nAttempt ${newRetries}/${MAX_LOGIN_RETRIES}`, CANCEL_KEYBOARD);
         return;
       }
-      setSession(chatId, { token: data.token, userId: data.user.id, name: data.user.name, email: data.user.email });
+      const authUser = getAuthUser(data);
+      setSession(chatId, {
+        token: data.token,
+        userId: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+      });
       clearState(chatId);
-      bot.sendMessage(chatId, MESSAGES.LOGIN_SUCCESS(data.user.name), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+      bot.sendMessage(chatId, MESSAGES.LOGIN_SUCCESS(authUser.name || authUser.email), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
       sendMenu(chatId, getSession(chatId));
     }
   }
@@ -239,9 +254,15 @@ module.exports = function registerStateMachine(bot) {
         if (status === 409) { clearState(chatId); bot.sendMessage(chatId, MESSAGES.REGISTER_EMAIL_EXISTS, AUTH_MENU_KEYBOARD); return; }
         bot.sendMessage(chatId, MESSAGES.REGISTER_FAILED(error || "Unknown"), CANCEL_KEYBOARD); return;
       }
-      setSession(chatId, { token: data.token, userId: data.user.id, name: data.user.name, email: data.user.email });
+      const authUser = getAuthUser(data);
+      setSession(chatId, {
+        token: data.token,
+        userId: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+      });
       clearState(chatId);
-      bot.sendMessage(chatId, MESSAGES.REGISTER_SUCCESS(data.user.name), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
+      bot.sendMessage(chatId, MESSAGES.REGISTER_SUCCESS(authUser.name || authUser.email), { parse_mode: "Markdown", ...REMOVE_KEYBOARD });
       sendMenu(chatId, getSession(chatId));
     }
   }

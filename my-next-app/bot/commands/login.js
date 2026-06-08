@@ -17,6 +17,15 @@ const { apiRequest, setSession } = require("../lib/session");
 // Track login state per chat ID
 const loginState = new Map();
 
+function getAuthUser(data) {
+  const user = data?.user ?? data ?? {};
+  return {
+    id: user.userId ?? user.id ?? data?.userId ?? data?.uid ?? "",
+    email: user.email ?? data?.email ?? "",
+    name: user.name ?? data?.name ?? "",
+  };
+}
+
 module.exports = function registerLogin(bot) {
   bot.onText(/^\/login$/, (msg) => {
     const chatId = msg.chat.id;
@@ -66,15 +75,17 @@ module.exports = function registerLogin(bot) {
         return;
       }
 
+      const authUser = getAuthUser(data);
       setSession(chatId, {
         token: data.token,
-        uid: data.uid,
-        email: data.email,
+        userId: authUser.id,
+        email: authUser.email,
+        name: authUser.name,
       });
 
       bot.sendMessage(
         chatId,
-        `✅ Welcome back, ${data.email}!\n\n` +
+        `✅ Welcome back, ${authUser.email || authUser.name || "user"}!\n\n` +
           "Use /list, /balance, /pay, /deploy, /status, or /stop."
       );
     }

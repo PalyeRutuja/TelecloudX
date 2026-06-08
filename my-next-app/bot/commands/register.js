@@ -17,6 +17,15 @@ const { apiRequest, setSession } = require("../lib/session");
 // Track registration state per chat ID
 const registrationState = new Map();
 
+function getAuthUser(data) {
+  const user = data?.user ?? data ?? {};
+  return {
+    id: user.userId ?? user.id ?? data?.userId ?? data?.uid ?? "",
+    email: user.email ?? data?.email ?? "",
+    name: user.name ?? data?.name ?? "",
+  };
+}
+
 module.exports = function registerRegister(bot) {
   bot.onText(/^\/register$/, (msg) => {
     const chatId = msg.chat.id;
@@ -66,15 +75,17 @@ module.exports = function registerRegister(bot) {
         return;
       }
 
+      const authUser = getAuthUser(data);
       setSession(chatId, {
         token: data.token,
-        uid: data.uid,
-        email: data.email,
+        userId: authUser.id,
+        email: authUser.email,
+        name: authUser.name,
       });
 
       bot.sendMessage(
         chatId,
-        `✅ Account created successfully!\n\nEmail: ${data.email}\n\n` +
+        `✅ Account created successfully!\n\nEmail: ${authUser.email}\n\n` +
           "Use /start <token> to link this Telegram chat to your account, " +
           "or use /list, /balance, /pay directly."
       );

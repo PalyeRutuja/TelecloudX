@@ -486,5 +486,162 @@
     },
     "createdAt": "2026-06-08T12:55:20.093Z",
     "updatedAt": "2026-06-08T12:55:20.093Z"
+  },
+  {
+    "id": "txn_1780927025582_14769767",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "razorpay",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T13:57:05.582Z"
+    },
+    "createdAt": "2026-06-08T13:57:05.582Z",
+    "updatedAt": "2026-06-08T14:03:54.408Z",
+    "providerTransactionId": "pay_SzAAyHss7oteHG"
+  },
+  {
+    "id": "txn_1780927628840_6a671305",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "internal",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "debit",
+      "description": "VM Deployment: hello",
+      "timestamp": "2026-06-08T14:07:08.837Z"
+    },
+    "createdAt": "2026-06-08T14:07:08.841Z",
+    "updatedAt": "2026-06-08T14:07:08.841Z"
+  },
+  {
+    "id": "txn_1780927702742_9a04dfe0",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "internal",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "debit",
+      "description": "VM Deployment: hello",
+      "timestamp": "2026-06-08T14:08:22.738Z"
+    },
+    "createdAt": "2026-06-08T14:08:22.743Z",
+    "updatedAt": "2026-06-08T14:08:22.743Z"
+  },
+  {
+    "id": "txn_1780927716374_0223f3bd",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "upi",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T14:08:36.374Z"
+    },
+    "createdAt": "2026-06-08T14:08:36.375Z",
+    "updatedAt": "2026-06-08T14:08:36.519Z",
+    "providerTransactionId": "upi_1780927716410"
+  },
+  {
+    "id": "txn_1780927727457_1951a8ac",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "razorpay",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T14:08:47.457Z"
+    },
+    "createdAt": "2026-06-08T14:08:47.458Z",
+    "updatedAt": "2026-06-08T14:09:43.372Z",
+    "providerTransactionId": "pay_SzAGxn7XWNYcFc"
+  },
+  {
+    "id": "txn_1780927800333_c8be6f6d",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "crypto",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T14:10:00.333Z",
+      "paymentType": "crypto",
+      "token": "XDC",
+      "tokenId": "xdc",
+      "walletAddress": "0xBeE4EE636524c948839E792B63F6C3dD63Da5F74",
+      "treasuryAddress": "0xBeE4EE636524c948839E792B63F6C3dD63Da5F74",
+      "credits": 50,
+      "xdcAmount": 3
+    },
+    "createdAt": "2026-06-08T14:10:00.334Z",
+    "updatedAt": "2026-06-08T14:10:12.654Z",
+    "providerTransactionId": "0x2fb6cf78ee2951c2c9f937d8a75103411645cdf483b8fe10f4ce478dea9049a7"
+  },
+  {
+    "id": "txn_1780928207780_6fce21c5",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "internal",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "debit",
+      "description": "VM Deployment: hi",
+      "timestamp": "2026-06-08T14:16:47.776Z"
+    },
+    "createdAt": "2026-06-08T14:16:47.782Z",
+    "updatedAt": "2026-06-08T14:16:47.782Z"
+  },
+  {
+    "id": "txn_1780928217706_6ff98a77",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 50,
+    "currency": "USD",
+    "provider": "upi",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T14:16:57.706Z"
+    },
+    "createdAt": "2026-06-08T14:16:57.707Z",
+    "updatedAt": "2026-06-08T14:16:57.876Z",
+    "providerTransactionId": "upi_1780928217761"
+  },
+  {
+    "id": "txn_1780928230024_159fd2a5",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "razorpay",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T14:17:10.024Z"
+    },
+    "createdAt": "2026-06-08T14:17:10.025Z",
+    "updatedAt": "2026-06-08T14:18:01.729Z",
+    "providerTransactionId": "pay_SzAPsN3kJjxOOa"
+  },
+  {
+    "id": "txn_1780928295216_d14f2f8d",
+    "userId": "tdGPr6wjRd3pgWa1TVAY",
+    "amount": 10,
+    "currency": "USD",
+    "provider": "crypto",
+    "status": "SUCCESS",
+    "metadata": {
+      "initiatedAt": "2026-06-08T14:18:15.216Z",
+      "paymentType": "crypto",
+      "token": "XDC",
+      "tokenId": "xdc",
+      "walletAddress": "0xBeE4EE636524c948839E792B63F6C3dD63Da5F74",
+      "treasuryAddress": "0xBeE4EE636524c948839E792B63F6C3dD63Da5F74",
+      "credits": 10,
+      "xdcAmount": 3
+    },
+    "createdAt": "2026-06-08T14:18:15.218Z",
+    "updatedAt": "2026-06-08T14:18:27.205Z",
+    "providerTransactionId": "0xcb618ec8d24cf022c2a8a18ff92be6737c24656b1caf08e885105732f1770927"
   }
 ]
