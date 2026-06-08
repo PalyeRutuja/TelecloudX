@@ -63,12 +63,16 @@ export async function verifyJWT(token: string): Promise<AuthUser | null> {
 
 const usersCollectionRef = () => adminFirestore.collection("users");
 
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 export async function createUser(name: string, email: string, passwordHash: string): Promise<User> {
   const now = new Date().toISOString();
   const ref = usersCollectionRef().doc();
   const user: User = {
     id: ref.id,
-    email: email.toLowerCase(),
+    email: normalizeEmail(email),
     name,
     passwordHash,
     createdAt: now,
@@ -78,7 +82,7 @@ export async function createUser(name: string, email: string, passwordHash: stri
 }
 
 export async function findUserByEmail(email: string): Promise<User | undefined> {
-  const q = usersCollectionRef().where("email", "==", email.toLowerCase()).limit(1);
+  const q = usersCollectionRef().where("email", "==", normalizeEmail(email)).limit(1);
   const snap = await q.get();
   if (snap.empty) return undefined;
   const docSnap = snap.docs[0];

@@ -12,8 +12,6 @@ const axios = require("axios");
 
 const BASE_URL =
   process.env.BOT_WEB_BASE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.WEB_BASE_URL ||
   "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
 const NORMALIZED_BASE_URL = BASE_URL.replace(/\/$/, "");
 /**

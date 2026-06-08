@@ -109,28 +109,33 @@ export async function processSuccessfulPayment(
   metadata?: Record<string, any>
 ): Promise<{ transaction: Transaction; wallet: { userId: string; balance: number; currency: string } }> {
   const txnRef = transactionRef(transactionId);
+  const walletRef = adminFirestore.collection("wallets").doc();
+  
+  // First, read both documents outside transaction to get userId
+  const txnSnapshot = await txnRef.get();
+  if (!txnSnapshot.exists) {
+    throw new Error("Transaction not found");
+  }
+  
+  const transaction = txnSnapshot.data() as Transaction;
+  
+  if (transaction.status === "SUCCESS") {
+    // Already processed, just return current state
+    const walletSnapshot = await adminFirestore.collection("wallets").doc(transaction.userId).get();
+    const wallet = walletSnapshot.exists 
+      ? walletSnapshot.data() as { userId: string; balance: number; currency: string }
+      : { userId: transaction.userId, balance: 0, currency: "USD" };
+    return { transaction, wallet };
+  }
+  
+  // Now do atomic update - all reads first, then writes
+  const userWalletRef = adminFirestore.collection("wallets").doc(transaction.userId);
   
   return await adminFirestore.runTransaction(async (tx) => {
-    const txnSnapshot = await tx.get(txnRef);
+    // Read wallet first
+    const walletSnapshot = await tx.get(userWalletRef);
     
-    if (!txnSnapshot.exists) {
-      throw new Error("Transaction not found");
-    }
-    
-    const transaction = txnSnapshot.data() as Transaction;
-    
-    if (transaction.status === "SUCCESS") {
-      // Already processed, just return current state
-      const walletSnapshot = await tx.get(
-        adminFirestore.collection("wallets").doc(transaction.userId)
-      );
-      const wallet = walletSnapshot.exists 
-        ? walletSnapshot.data() as { userId: string; balance: number; currency: string }
-        : { userId: transaction.userId, balance: 0, currency: "USD" };
-      return { transaction, wallet };
-    }
-    
-    // Update transaction
+    // Prepare data
     const updatedTransaction: Transaction = {
       ...transaction,
       status: "SUCCESS",
@@ -138,11 +143,6 @@ export async function processSuccessfulPayment(
       metadata: { ...transaction.metadata, ...metadata },
       updatedAt: nowIso(),
     };
-    tx.set(txnRef, updatedTransaction);
-    
-    // Update wallet balance
-    const walletRef = adminFirestore.collection("wallets").doc(transaction.userId);
-    const walletSnapshot = await tx.get(walletRef);
     
     let walletData: { userId: string; balance: number; currency: string; createdAt: string; updatedAt: string };
     
@@ -163,7 +163,9 @@ export async function processSuccessfulPayment(
       };
     }
     
-    tx.set(walletRef, walletData);
+    // All writes after all reads
+    tx.set(txnRef, updatedTransaction);
+    tx.set(userWalletRef, walletData);
     
     return { transaction: updatedTransaction, wallet: walletData };
   });
