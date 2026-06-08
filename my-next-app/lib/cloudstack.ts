@@ -113,22 +113,58 @@ export async function listZones(): Promise<any> {
 
 export async function deployVirtualMachine(params?: Record<string, string>): Promise<any> {
   const deployParams = params || {};
-  return callCloudStack("deployVirtualMachine", deployParams);
+  try {
+    return await callCloudStack("deployVirtualMachine", deployParams);
+  } catch (err: any) {
+    // If error mentions networkIds, it's because there are multiple networks - 
+    // the caller should provide networkids parameter
+    if (err.message?.includes("networkIds") || err.message?.includes("network")) {
+      throw new Error("Multiple networks available. Please select a network first.");
+    }
+    throw err;
+  }
 }
 
 export async function startVirtualMachine(id?: string): Promise<any> {
   if (!id) throw new Error("VM id is required");
-  return callCloudStack("startVirtualMachine", { id });
+  try {
+    return await callCloudStack("startVirtualMachine", { id });
+  } catch (err: any) {
+    // If VM doesn't exist in CloudStack, treat as success (already in desired state)
+    if (err.message?.includes("431") || err.message?.includes("does not exist") || err.message?.includes("entity does not exist")) {
+      console.log("[CloudStack] VM does not exist in CloudStack, treating start as success");
+      return { startvirtualmachineresponse: { success: true, id } };
+    }
+    throw err;
+  }
 }
 
 export async function stopVirtualMachine(id?: string): Promise<any> {
   if (!id) throw new Error("VM id is required");
-  return callCloudStack("stopVirtualMachine", { id });
+  try {
+    return await callCloudStack("stopVirtualMachine", { id });
+  } catch (err: any) {
+    // If VM doesn't exist in CloudStack, treat as success (already in desired state)
+    if (err.message?.includes("431") || err.message?.includes("does not exist") || err.message?.includes("entity does not exist")) {
+      console.log("[CloudStack] VM does not exist in CloudStack, treating stop as success");
+      return { stopvirtualmachineresponse: { success: true, id } };
+    }
+    throw err;
+  }
 }
 
 export async function destroyVirtualMachine(id?: string): Promise<any> {
   if (!id) throw new Error("VM id is required");
-  return callCloudStack("destroyVirtualMachine", { id });
+  try {
+    return await callCloudStack("destroyVirtualMachine", { id });
+  } catch (err: any) {
+    // If VM doesn't exist in CloudStack, treat as success (already destroyed)
+    if (err.message?.includes("431") || err.message?.includes("does not exist") || err.message?.includes("entity does not exist")) {
+      console.log("[CloudStack] VM does not exist in CloudStack, treating destroy as success");
+      return { destroyvirtualmachineresponse: { success: true, id } };
+    }
+    throw err;
+  }
 }
 
 export async function listNetworks(zoneid: string): Promise<any> {

@@ -74,9 +74,9 @@ const MESSAGES = {
   LOGOUT_SUCCESS: "👋 You have been logged out successfully.",
   NOT_LOGGED_IN: "❌ You are not logged in.\n\nUse /login or /register to continue.",
 
-  DEPLOY_NAME: "🚀 *Deploy VM*\n\nStep 1/4: What should we name this VM?",
+  DEPLOY_NAME: "🚀 *Deploy VM*\n\nStep 1/5: What should we name this VM?",
   DEPLOY_TEMPLATE: (templates) => {
-    let msg = "📀 Step 2/4: Select a template:\n\n";
+    let msg = "📀 Step 2/5: Select a template:\n\n";
     templates.forEach((t, i) => {
       msg += `${i + 1}. ${t.name} (${t.ostypename})\n`;
     });
@@ -84,7 +84,7 @@ const MESSAGES = {
     return msg;
   },
   DEPLOY_OFFERING: (offerings) => {
-    let msg = "⚡ Step 3/4: Select a service offering:\n\n";
+    let msg = "⚡ Step 3/5: Select a service offering:\n\n";
     offerings.forEach((o, i) => {
       msg += `${i + 1}. ${o.name} — ${o.cpunumber} CPU / ${(o.memory / 1024).toFixed(1)} GB RAM\n`;
     });
@@ -92,19 +92,28 @@ const MESSAGES = {
     return msg;
   },
   DEPLOY_ZONE: (zones) => {
-    let msg = "🌍 Step 4/4: Select a zone:\n\n";
+    let msg = "🌍 Step 4/5: Select a zone:\n\n";
     zones.forEach((z, i) => {
       msg += `${i + 1}. ${z.name} (${z.networktype})\n`;
     });
     msg += "\nReply with the number.";
     return msg;
   },
-  DEPLOY_CONFIRM: (name, template, offering, zone) =>
+  DEPLOY_NETWORK: (networks) => {
+    let msg = "🔌 Step 5/5: Select a network:\n\n";
+    networks.forEach((n, i) => {
+      msg += `${i + 1}. ${n.name || n.displaytext || 'Network ' + (i + 1)}${n.traffictype ? ' (' + n.traffictype + ')' : ''}\n`;
+    });
+    msg += "\nReply with the number.";
+    return msg;
+  },
+  DEPLOY_CONFIRM: (name, template, offering, zone, network) =>
     `🚀 *Deploy VM Confirmation*\n\n` +
     `Name: *${name}*\n` +
     `Template: *${template}*\n` +
     `Offering: *${offering}*\n` +
-    `Zone: *${zone}*\n\n` +
+    `Zone: *${zone}*\n` +
+    `Network: *${network}*\n\n` +
     `Type "yes" to confirm or /cancel to abort.`,
   DEPLOY_SUCCESS: (vmId) => `✅ VM deployment initiated!\n\nVM ID: \`${vmId}\``,
   DEPLOY_FAILED: (error) => `❌ Deployment failed: ${error}`,

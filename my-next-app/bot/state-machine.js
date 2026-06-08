@@ -276,8 +276,26 @@ module.exports = function registerStateMachine(bot) {
       const idx = parseInt(text, 10) - 1;
       if (isNaN(idx) || idx < 0 || idx >= (state.data.zones || []).length) { bot.sendMessage(chatId, "Invalid selection. Reply with a number.", CANCEL_KEYBOARD); return; }
       state.data.zoneId = state.data.zones[idx].id; state.data.zoneName = state.data.zones[idx].name;
+      state.step = "fetch_networks"; setState(chatId, state);
+      bot.sendMessage(chatId, MESSAGES.PROCESSING);
+      const { data: netData, error: netError, status: netStatus } = await apiRequest("GET", `/api/cloudstack/vms/networks?zoneid=${encodeURIComponent(state.data.zoneId)}`, chatId);
+      if (netError) { handleApiError(bot, chatId, netError, netStatus); clearState(chatId); return; }
+      state.data.networks = netData.networks || [];
+      if (state.data.networks.length === 0) {
+        // No networks available, skip to confirm
+        state.step = "confirm"; setState(chatId, state);
+        bot.sendMessage(chatId, MESSAGES.DEPLOY_CONFIRM(state.data.name, state.data.templateName, state.data.serviceOfferingName, state.data.zoneName, "Default"), { parse_mode: "Markdown", ...CANCEL_KEYBOARD }); return;
+      }
+      state.step = "network"; setState(chatId, state);
+      bot.sendMessage(chatId, MESSAGES.DEPLOY_NETWORK(state.data.networks), CANCEL_KEYBOARD); return;
+    }
+    if (state.step === "network") {
+      const idx = parseInt(text, 10) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= (state.data.networks || []).length) { bot.sendMessage(chatId, "Invalid selection. Reply with a number.", CANCEL_KEYBOARD); return; }
+      state.data.networkId = state.data.networks[idx].id || state.data.networks[idx].uuid;
+      state.data.networkName = state.data.networks[idx].name || state.data.networks[idx].displaytext || "Selected Network";
       state.step = "confirm"; setState(chatId, state);
-      bot.sendMessage(chatId, MESSAGES.DEPLOY_CONFIRM(state.data.name, state.data.templateName, state.data.serviceOfferingName, state.data.zoneName), { parse_mode: "Markdown", ...CANCEL_KEYBOARD }); return;
+      bot.sendMessage(chatId, MESSAGES.DEPLOY_CONFIRM(state.data.name, state.data.templateName, state.data.serviceOfferingName, state.data.zoneName, state.data.networkName), { parse_mode: "Markdown", ...CANCEL_KEYBOARD }); return;
     }
     if (state.step === "confirm") {
       const lower = text.toLowerCase();
@@ -303,7 +321,7 @@ module.exports = function registerStateMachine(bot) {
       }
 
       bot.sendMessage(chatId, MESSAGES.PROCESSING);
-      const { data, error, status } = await apiRequest("POST", "/api/cloudstack/vms/deploy", chatId, {
+      const deployPayload = {
         name: state.data.name,
         displayname: state.data.name,
         serviceofferingid: state.data.serviceOfferingId,
@@ -312,7 +330,11 @@ module.exports = function registerStateMachine(bot) {
         templatename: state.data.templateName,
         zoneid: state.data.zoneId,
         zonename: state.data.zoneName,
-      });
+      };
+      if (state.data.networkId) {
+        deployPayload.networkid = state.data.networkId;
+      }
+      const { data, error, status } = await apiRequest("POST", "/api/cloudstack/vms/deploy", chatId, deployPayload);
       clearState(chatId);
       if (error) { handleApiError(bot, chatId, error, status); sendMenu(chatId, session); return; }
 
