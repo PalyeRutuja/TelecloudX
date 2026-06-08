@@ -109,9 +109,8 @@ export async function processSuccessfulPayment(
   metadata?: Record<string, any>
 ): Promise<{ transaction: Transaction; wallet: { userId: string; balance: number; currency: string } }> {
   const txnRef = transactionRef(transactionId);
-  const walletRef = adminFirestore.collection("wallets").doc();
-  
-  // First, read both documents outside transaction to get userId
+
+  // Read the transaction first so we know which wallet to update.
   const txnSnapshot = await txnRef.get();
   if (!txnSnapshot.exists) {
     throw new Error("Transaction not found");
@@ -122,53 +121,41 @@ export async function processSuccessfulPayment(
   if (transaction.status === "SUCCESS") {
     // Already processed, just return current state
     const walletSnapshot = await adminFirestore.collection("wallets").doc(transaction.userId).get();
-    const wallet = walletSnapshot.exists 
-      ? walletSnapshot.data() as { userId: string; balance: number; currency: string }
+    const wallet = walletSnapshot.exists
+      ? (walletSnapshot.data() as { userId: string; balance: number; currency: string })
       : { userId: transaction.userId, balance: 0, currency: "USD" };
     return { transaction, wallet };
   }
-  
-  // Now do atomic update - all reads first, then writes
+
   const userWalletRef = adminFirestore.collection("wallets").doc(transaction.userId);
-  
-  return await adminFirestore.runTransaction(async (tx) => {
-    // Read wallet first
-    const walletSnapshot = await tx.get(userWalletRef);
-    
-    // Prepare data
-    const updatedTransaction: Transaction = {
-      ...transaction,
-      status: "SUCCESS",
-      providerTransactionId: providerTransactionId || transaction.providerTransactionId,
-      metadata: { ...transaction.metadata, ...metadata },
-      updatedAt: nowIso(),
-    };
-    
-    let walletData: { userId: string; balance: number; currency: string; createdAt: string; updatedAt: string };
-    
-    if (!walletSnapshot.exists) {
-      walletData = {
-        userId: transaction.userId,
-        balance: transaction.amount,
-        currency: "USD",
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
-      };
-    } else {
-      const current = walletSnapshot.data() as any;
-      walletData = {
-        ...current,
-        balance: (current.balance || 0) + transaction.amount,
-        updatedAt: nowIso(),
-      };
-    }
-    
-    // All writes after all reads
-    tx.set(txnRef, updatedTransaction);
-    tx.set(userWalletRef, walletData);
-    
-    return { transaction: updatedTransaction, wallet: walletData };
-  });
+  const walletSnapshot = await userWalletRef.get();
+  const currentWallet = walletSnapshot.exists
+    ? (walletSnapshot.data() as { userId: string; balance: number; currency: string; createdAt?: string; updatedAt?: string })
+    : { userId: transaction.userId, balance: 0, currency: "USD" };
+
+  const updatedTransaction: Transaction = {
+    ...transaction,
+    status: "SUCCESS",
+    providerTransactionId: providerTransactionId || transaction.providerTransactionId,
+    metadata: { ...transaction.metadata, ...metadata },
+    updatedAt: nowIso(),
+  };
+
+  const walletData = {
+    ...currentWallet,
+    userId: transaction.userId,
+    balance: (currentWallet.balance || 0) + transaction.amount,
+    currency: currentWallet.currency || "USD",
+    updatedAt: nowIso(),
+    createdAt: currentWallet.createdAt || nowIso(),
+  };
+
+  const batch = adminFirestore.batch();
+  batch.set(txnRef, updatedTransaction);
+  batch.set(userWalletRef, walletData);
+  await batch.commit();
+
+  return { transaction: updatedTransaction, wallet: walletData };
 }
 
 export async function processFailedPayment(
@@ -210,41 +197,40 @@ export async function processDebit(
   const txnRef = transactionRef(transactionId);
   const now = nowIso();
   
-  return await adminFirestore.runTransaction(async (tx) => {
-    const walletSnapshot = await tx.get(walletRef);
-    
-    if (!walletSnapshot.exists) {
-      throw new Error("Insufficient balance");
-    }
-    
-    const currentWallet = walletSnapshot.data() as any;
-    
-    if ((currentWallet.balance || 0) < amount) {
-      throw new Error("Insufficient balance");
-    }
-    
-    // Deduct from wallet
-    const updatedWallet = {
-      ...currentWallet,
-      balance: currentWallet.balance - amount,
-      updatedAt: now,
-    };
-    tx.set(walletRef, updatedWallet);
-    
-    // Create debit transaction
-    const transaction: Transaction = {
-      id: transactionId,
-      userId,
-      amount,
-      currency: currentWallet.currency || "USD",
-      provider,
-      status: "SUCCESS",
-      metadata,
-      createdAt: now,
-      updatedAt: now,
-    };
-    tx.set(txnRef, transaction);
-    
-    return { transaction, wallet: updatedWallet };
-  });
+  const walletSnapshot = await walletRef.get();
+
+  if (!walletSnapshot.exists) {
+    throw new Error("Insufficient balance");
+  }
+
+  const currentWallet = walletSnapshot.data() as any;
+
+  if ((currentWallet.balance || 0) < amount) {
+    throw new Error("Insufficient balance");
+  }
+
+  const updatedWallet = {
+    ...currentWallet,
+    balance: currentWallet.balance - amount,
+    updatedAt: now,
+  };
+
+  const transaction: Transaction = {
+    id: transactionId,
+    userId,
+    amount,
+    currency: currentWallet.currency || "USD",
+    provider,
+    status: "SUCCESS",
+    metadata,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const batch = adminFirestore.batch();
+  batch.set(walletRef, updatedWallet);
+  batch.set(txnRef, transaction);
+  await batch.commit();
+
+  return { transaction, wallet: updatedWallet };
 }

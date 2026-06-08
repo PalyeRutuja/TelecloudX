@@ -10,10 +10,18 @@
 
 const axios = require("axios");
 
-const BASE_URL =
-  process.env.BOT_WEB_BASE_URL ||
-  "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
-const NORMALIZED_BASE_URL = BASE_URL.replace(/\/$/, "");
+function normalizeBaseUrl(value) {
+  const raw = (value || "").trim();
+  if (!raw) {
+    return "https://telecloud-x-hiv7-rutujapalye12-9049s-projects.vercel.app";
+  }
+  if (/^https?:\/\//i.test(raw)) {
+    return raw.replace(/\/$/, "");
+  }
+  return `https://${raw.replace(/\/$/, "")}`;
+}
+
+const NORMALIZED_BASE_URL = normalizeBaseUrl(process.env.BOT_WEB_BASE_URL);
 /**
  * Map<telegramId, { token: string, email: string, name: string, userId: string }>
  * Stores auth tokens per Telegram user ID.

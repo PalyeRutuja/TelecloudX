@@ -8,7 +8,20 @@
  *   node bot/index.js
  */
 
-require("dotenv").config({ path: ".env.local" });
+const fs = require("fs");
+const path = require("path");
+const dotenv = require("dotenv");
+
+// Load local env files only when running outside production.
+// Render/Vercel should provide real environment variables directly.
+if (process.env.NODE_ENV !== "production") {
+  const localEnvPath = path.join(__dirname, ".env.local");
+  if (fs.existsSync(localEnvPath)) {
+    dotenv.config({ path: localEnvPath });
+  } else {
+    dotenv.config();
+  }
+}
 const express = require("express");
 
 const TelegramBot = require("node-telegram-bot-api");
