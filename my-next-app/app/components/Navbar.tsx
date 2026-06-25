@@ -73,7 +73,7 @@ export default function Navbar() {
 
               {/* Login */}
               <a
-                href="#login"
+                href="/login"
                 className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
               >
                 Login
@@ -132,7 +132,7 @@ export default function Navbar() {
                   <Send className="h-4 w-4" />
                   Telegram Bot
                 </a>
-                <a href="#login" className="text-sm text-gray-400 hover:text-white">Login</a>
+                <a href="/login" className="text-sm text-gray-400 hover:text-white">Login</a>
               </div>
               <a
                 href="#contact"

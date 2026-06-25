@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "cd my-next-app && npm run dev",
+    "build": "cd my-next-app && npm run build",
+    "start": "cd my-next-app && npm start",
+    "lint": "cd my-next-app && npm run lint"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
